@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Server | اپیزود ۱</title>
+    
+    <!-- Vazirmatn Font (Strictly Enforced) -->
+    <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Courier New", 'monospace']
+                    },
+                    colors: {
+                        accent: '#00e5ff',
+                        accentHover: '#33edff',
+                        darkBg: '#050b14',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Dark Theme & Background Pattern */
+        body {
+            font-family: 'Vazirmatn', sans-serif !important;
+            background-color: #050b14;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(0, 229, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(0, 229, 255, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-sidebar {
+            background: rgba(5, 10, 20, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0, 229, 255, 0.2);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Sections Toggle */
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050b14; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+
+        /* Monospace / Code Blocks */
+        .mono-inline {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0, 0, 0, 0.6);
+            color: #67e8f9;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        /* Sidebar active item styling */
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, transparent 100%);
+            border-right: 3px solid #00e5ff;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex selection:bg-accent selection:text-darkBg">
+
+    <!-- Mobile Header & Menu Toggle -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 h-16 glass-panel z-50 flex items-center justify-between px-6 border-b border-accent/20">
+        <div class="text-accent font-bold text-lg"><i class="fa-brands fa-microsoft me-2"></i>Exchange Server</div>
+        <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar (Right) -->
+    <aside id="sidebar" class="glass-sidebar w-72 fixed h-full right-0 top-0 z-40 transform translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col pt-16 lg:pt-0 shrink-0">
+        <div class="p-6 border-b border-white/5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center border border-accent/40 shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                <i class="fa-solid fa-server text-accent text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg leading-tight">مستندات معماری</h1>
+                <p class="text-accent/80 text-sm mt-1">اپیزود ۱ : مفاهیم پایه</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-2 custom-scrollbar">
+            <p class="px-4 text-xs font-semibold text-gray-500 mb-2 mt-2 tracking-wider">سرفصل‌های اپیزود</p>
+            
+            <a href="#" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="intro-services">
+                <i class="fa-solid fa-envelope-open-text w-5 text-center"></i>
+                <span class="text-sm font-medium">ماهیت و سرویس‌های اکسچنج</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="ad-dependency">
+                <i class="fa-solid fa-sitemap w-5 text-center"></i>
+                <span class="text-sm font-medium">وابستگی به دامین و SCP</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="domain-design">
+                <i class="fa-solid fa-network-wired w-5 text-center"></i>
+                <span class="text-sm font-medium">طراحی دامین (مزایا و معایب)</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="roles-network">
+                <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                <span class="text-sm font-medium">رول‌ها، Edge و معماری شبکه</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="dns-publishing">
+                <i class="fa-solid fa-globe w-5 text-center"></i>
+                <span class="text-sm font-medium">سناریوهای DNS و پابلیشینگ</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="exchange-versions">
+                <i class="fa-solid fa-code-branch w-5 text-center"></i>
+                <span class="text-sm font-medium">نسخه‌ها و سازگاری‌ها</span>
+            </a>
+        </nav>
+        <!-- NO FOOTER ALLOWED HERE (RED RULE 1) -->
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 lg:mr-72 min-h-screen pt-24 lg:pt-10 px-4 sm:px-8 lg:px-12 pb-16">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- SECTION 1: Intro & Services -->
+            <section id="intro-services" class="section-content active fade-in">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-[60px] pointer-events-none"></div>
+                    
+                    <div class="inline-block px-3 py-1 rounded-md bg-accent/10 border border-accent/20 text-accent text-xs font-bold mb-5 tracking-wider">
+                        CORE CONCEPTS
+                    </div>
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-envelope-open-text text-accent"></i>
+                        اکسچنج سرور دقیقاً چیست؟
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <p class="text-base text-gray-300 leading-loose text-justify">
+                            <strong>Exchange Server</strong> محصول قدرتمند و سازمانی (Enterprise) شرکت مایکروسافت است. اگرچه در نگاه اول به عنوان یک «ایمیل سرور» شناخته می‌شود، اما اکسچنج بسیار فراتر از ارسال و دریافت پیام است؛ این پلتفرم قلب تپنده‌ی ارتباطات، زمان‌بندی و مدیریت منابع در شبکه‌های بزرگ است.
+                        </p>
+
+                        <div class="bg-blue-500/10 p-6 rounded-2xl border border-blue-500/20 relative overflow-hidden">
+                            <div class="absolute left-0 top-0 w-1 h-full bg-blue-500"></div>
+                            <h3 class="font-bold text-blue-400 mb-5 text-lg flex items-center gap-2"><i class="fa-solid fa-cogs"></i> سرویس‌های کلیدی و پنهان اکسچنج</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="bg-black/40 p-5 rounded-xl border border-white/5 hover:border-accent/30 transition-all">
+                                    <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-3">
+                                        <i class="fa-solid fa-calendar-days text-xl"></i>
+                                    </div>
+                                    <strong class="text-white text-base block mb-2">Calendar (تقویم سازمانی)</strong>
+                                    <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                        تنظیم برنامه‌ها و جلسات در سطح کل سازمان. مدیران می‌توانند تقویم پرسنل را بررسی کنند تا با مشاهده زمان‌های خالی (Free/Busy Time)، جلسات را بدون تداخل زمانی تنظیم کنند.
+                                    </p>
+                                </div>
+                                <div class="bg-black/40 p-5 rounded-xl border border-white/5 hover:border-accent/30 transition-all">
+                                    <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-3">
+                                        <i class="fa-solid fa-list-check text-xl"></i>
+                                    </div>
+                                    <strong class="text-white text-base block mb-2">Tasks & To-Do Lists</strong>
+                                    <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                        امکان ایجاد لیست وظایف (Inventory)، اختصاص (Assign) یک کار به کارمندان دیگر و مانیتورینگ دقیق میزان پیشرفت پروژه‌ها مستقیماً در بستر Outlook.
+                                    </p>
+                                </div>
+                                <div class="bg-black/40 p-5 rounded-xl border border-white/5 md:col-span-2 hover:border-accent/30 transition-all">
+                                    <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mb-3">
+                                        <i class="fa-solid fa-people-roof text-xl"></i>
+                                    </div>
+                                    <strong class="text-white text-base block mb-2">Resource & Room Booking</strong>
+                                    <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                        مدیریت رزرو منابع فیزیکی! شما می‌توانید برای «اتاق جلسات» یا «ویدئو پروژکتور» یک اکانت (Mailbox) بسازید. کارمندان برای رزرو، یک درخواست جلسه (Meeting Request) به ایمیل اتاق می‌فرستند؛ سیستم در صورت خالی بودن تایم، آن را اتوماتیک تایید و رزرو می‌کند.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: AD Dependency -->
+            <section id="ad-dependency" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-sitemap text-accent"></i>
+                        وابستگی مطلق به Active Directory
+                    </h2>
+
+                    <div class="space-y-6">
+                        <div class="bg-red-500/10 border-r-4 border-red-500 p-5 rounded-l-xl">
+                            <h4 class="text-red-400 font-bold mb-2">قانون اول معماری:</h4>
+                            <p class="text-[15px] text-gray-300 leading-relaxed text-justify">
+                                <strong>اکسچنج سرور بلاشک دامین می‌خواهد!</strong> اکسچنج هیچ دیتابیس مستقلی برای احراز هویت کاربران (نام کاربری و رمز عبور) ندارد و هویت خود را کاملاً با Active Directory گره می‌زند (Integration).
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                            <!-- Requirements -->
+                            <div class="bg-[#050b14]/60 p-6 rounded-2xl border border-white/5">
+                                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-server text-accent"></i> پیش‌نیازهای زیرساخت دامین
+                                </h3>
+                                <ul class="space-y-4">
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                        <span class="text-sm text-gray-400 leading-relaxed">نیاز به <strong class="text-white">Domain Controller (DC)</strong> که حتماً باید <strong class="text-accent">Writable</strong> باشد. (سرورهای RODC کافی نیستند چون اکسچنج نیازمند تغییرات مداوم در Schema و آبجکت‌هاست).</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                        <span class="text-sm text-gray-400 leading-relaxed">نیاز حیاتی به <strong class="text-white">Global Catalog (GC)</strong> برای جستجوی سریع آدرس‌ها (GAL) در سطح ساختار Forest.</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                        <span class="text-sm text-gray-400 leading-relaxed">وابستگی کامل به <strong>AD Sites</strong>؛ اکسچنج برای مسیریابی ایمیل‌ها بین لوکیشن‌های مختلف شرکت، مستقیماً از Site Link های اکتیو دایرکتوری استفاده می‌کند.</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- SCP Concept -->
+                            <div class="bg-purple-900/10 p-6 rounded-2xl border border-purple-500/30 relative overflow-hidden">
+                                <div class="absolute left-0 top-0 w-1 h-full bg-purple-500"></div>
+                                <h3 class="text-xl font-bold text-purple-400 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass-location"></i> ویژگی SCP (جادوی Autodiscover)
+                                </h3>
+                                <p class="text-sm text-gray-300 leading-loose text-justify">
+                                    مخفف <strong>Service Connection Point</strong>. وقتی اکسچنج را روی دامین نصب می‌کنیم، یک رکورد SCP در پارتیشن Configuration دامین می‌سازد. 
+                                </p>
+                                <p class="text-sm text-gray-400 leading-loose text-justify mt-2 p-3 bg-black/40 rounded-xl border border-white/5">
+                                    <strong class="text-white">کاربرد:</strong> کلاینت‌هایی که عضو دامین هستند (Domain-Joined) برای تنظیم اوت‌لوک نیازی به وارد کردن دستی آدرس سرور ندارند. کلاینت، اکتیو دایرکتوری را کوئری می‌کند، رکورد SCP را می‌خواند و آدرس سرور اکسچنج را به صورت کاملاً خودکار پیدا و تنظیمات را اعمال می‌کند.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Domain Architecture -->
+            <section id="domain-design" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-network-wired text-accent"></i>
+                        معماری استقرار: اکسچنج کجای دامین نصب شود؟
+                    </h2>
+
+                    <div class="space-y-6">
+                        <p class="text-base text-gray-300 leading-relaxed text-justify mb-6">
+                            آیا اکسچنج را در دامین اصلی نصب کنیم یا یک دامین مجزا؟ این یکی از مهم‌ترین سوالات مصاحبه و طراحی است که پاسخ آن بر اساس استراتژی سازمان تعیین می‌شود.
+                        </p>
+
+                        <!-- Main Domain -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5 mb-6">
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-3">سناریو ۱: نصب در دامین اصلی (Main Domain)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <strong class="text-base text-emerald-400 block mb-2"><i class="fa-solid fa-thumbs-up mr-1"></i> مزایا (SSO)</strong>
+                                    <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                        سهولت استفاده بی‌نظیر برای کاربران. با قابلیت <strong>Single Sign-On (SSO)</strong>، کاربری که به ویندوز لاگین کرده، بدون نیاز به وارد کردن مجدد یوزر و پسورد، اوت‌لوک خود را باز کرده و استفاده می‌کند. ویژگی SCP به بهترین شکل کار می‌کند.
+                                    </p>
+                                </div>
+                                <div class="bg-red-500/5 p-4 rounded-xl border border-red-500/20">
+                                    <strong class="text-base text-red-400 block mb-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i> معایب (ریسک فاجعه‌بار)</strong>
+                                    <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                        اکسچنج دسترسی‌های سطح بالای Enterprise/Schema Admin در AD ایجاد می‌کند. اگر هکر به دلیل آسیب‌پذیری‌های وب (Owa/ECP) به اکسچنج نفوذ کند، <strong class="text-red-400 font-bold">کل دامین سازمان روی هوا می‌رود</strong> و اکتیو دایرکتوری کاملاً Compromise می‌شود.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Isolation Scenarios -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5 relative overflow-hidden">
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-3">سناریو ۲: ایزوله‌سازی و ساخت دامین مجزا</h3>
+                            
+                            <div class="space-y-4 mt-4">
+                                <div class="bg-orange-500/10 p-5 rounded-xl border border-orange-500/20">
+                                    <strong class="text-orange-400 text-base mb-2 block"><i class="fa-solid fa-ban"></i> چرا Child Domain یا Tree اشتباه است؟</strong>
+                                    <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                        در معماری اکتیو دایرکتوری، بین تمامی دامین‌های یک Forest، ویژگی <strong>Two-way Transitive Trust (اعتماد دوطرفه و انتقالی)</strong> به صورت اتوماتیک برقرار است. پس اگر اکسچنج را در یک Child Domain بگذاریم و هکر آن را بزند، از طریق این Trust اتوماتیک، به راحتی وارد دامین اصلی (Root) می‌شود و باز هم کل سازمان هک می‌شود!
+                                    </p>
+                                </div>
+                                <div class="bg-emerald-500/10 p-5 rounded-xl border-l-4 border-emerald-500">
+                                    <strong class="text-emerald-400 text-base mb-2 block"><i class="fa-solid fa-shield-virus"></i> راهکار طلایی: Resource Forest</strong>
+                                    <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                        امن‌ترین طراحی Enterprise. اکسچنج را در یک <strong>Forest کاملاً مجزا و مستقل</strong> (با دامین کنترلر خودش) نصب می‌کنیم. سپس بین این Forest و Forest اصلی کاربران، یک <strong>Trust یک‌طرفه (One-way Trust)</strong> ایجاد می‌کنیم. بدین ترتیب حتی در صورت هک شدن اکسچنج، Forest اصلی کاربران امن می‌ماند.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Roles & Network Architecture -->
+            <section id="roles-network" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-shield-halved text-accent"></i>
+                        معماری شبکه، DMZ و رول‌های پنج‌گانه
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- Network Placement -->
+                        <div class="flex items-center gap-4 bg-[#050b14] p-5 rounded-2xl border border-white/5">
+                            <div class="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center shrink-0 border border-red-500/40">
+                                <i class="fa-solid fa-crosshairs text-red-500 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white mb-1">جایگاه اکسچنج در شبکه (امنیت)</h3>
+                                <p class="text-sm text-gray-400 leading-relaxed">
+                                    اکسچنج به دلیل انتشار در اینترنت، <strong>هکرخور بسیار ملسی دارد</strong>. پیشنهاد قطعی معماری این است که در یک زون (VLAN) کاملاً ایزوله قرار گیرد و در سازمان‌های بزرگ، حتی <strong>فایروال فیزیکی/مجازی اختصاصی</strong> خود را (مستقل از فایروال کاربران) داشته باشد.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 5 Classic Roles -->
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-2">۵ رول کلاسیک اکسچنج (پیش از تجمیع در نسخه‌های جدید)</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                                <div class="bg-black/40 p-4 rounded-xl border border-white/5 text-center">
+                                    <i class="fa-solid fa-database text-accent mb-2 text-xl"></i>
+                                    <strong class="block text-white text-sm mb-1">Mailbox (MBX)</strong>
+                                    <span class="text-xs text-gray-500">نگهداری دیتابیس ایمیل‌ها</span>
+                                </div>
+                                <div class="bg-black/40 p-4 rounded-xl border border-white/5 text-center">
+                                    <i class="fa-solid fa-laptop-code text-accent mb-2 text-xl"></i>
+                                    <strong class="block text-white text-sm mb-1">Client Access (CAS)</strong>
+                                    <span class="text-xs text-gray-500">رابط وب/اوت‌لوک کاربران</span>
+                                </div>
+                                <div class="bg-black/40 p-4 rounded-xl border border-white/5 text-center">
+                                    <i class="fa-solid fa-route text-accent mb-2 text-xl"></i>
+                                    <strong class="block text-white text-sm mb-1">Hub Transport</strong>
+                                    <span class="text-xs text-gray-500">مسیریاب داخلی سازمان</span>
+                                </div>
+                                <div class="bg-black/40 p-4 rounded-xl border border-white/5 text-center">
+                                    <i class="fa-solid fa-phone-volume text-accent mb-2 text-xl"></i>
+                                    <strong class="block text-white text-sm mb-1">Unified Messaging</strong>
+                                    <span class="text-xs text-gray-500">ادغام با VoIP / پیغام‌گیر</span>
+                                </div>
+                            </div>
+
+                            <!-- Edge Transport Deep Dive -->
+                            <div class="bg-accent/10 p-6 rounded-2xl border border-accent/30 relative">
+                                <div class="absolute -top-3 right-6 bg-[#050b14] px-3 border border-accent/30 rounded text-accent text-xs font-bold">رول پنجم و استثنایی</div>
+                                <h4 class="font-bold text-white mb-3 text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-user-shield text-accent"></i> Edge Transport (پاسبان لبه شبکه)
+                                </h4>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                    تنها رول اکسچنج است که <strong class="text-accent underline underline-offset-4">هرگز به اکتیو دایرکتوری Join نمی‌شود!</strong> 
+                                </p>
+                                <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                    جایگاه این سرور دقیقاً در منطقه <strong>DMZ</strong> است. وظیفه آن دریافت ایمیل‌ها از دنیای اینترنت، فیلتر کردن اسپم‌ها (Anti-Spam) و ویروس‌هاست. پس از پاکسازی، ایمیل سالم را به سرورهای داخل شبکه پاس می‌دهد. چون عضو دامین نیست، تسخیر آن توسط هکر باعث به خطر افتادن اطلاعات AD نمی‌شود (برای مدیریت تنظیمات خود از یک سرویس داخلی به نام AD LDS استفاده می‌کند).
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SECTION 5: DNS Architecture -->
+            <section id="dns-publishing" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-globe text-accent"></i>
+                        پابلیش کردن و معماری امن DNS
+                    </h2>
+
+                    <div class="space-y-6">
+                        <p class="text-base text-gray-300 leading-relaxed text-justify mb-4">
+                            برای آنکه ایمیل‌های بیرون (مثل Gmail) بتوانند اکسچنج ما را پیدا کنند، به یک دامنه اینترنتی Valid و تنظیم رکورد <strong>MX (Mail Exchanger)</strong> در DNS نیاز داریم. برای مدیریت DNS دو راه وجود دارد:
+                        </p>
+
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5 mb-6 flex flex-col md:flex-row gap-6">
+                            <div class="flex-1">
+                                <strong class="text-white block mb-2 border-b border-white/10 pb-2">۱. Public Provider</strong>
+                                <p class="text-sm text-gray-400 leading-relaxed">استفاده از پنل DNS شرکتی که دامنه را از آن خریدیم یا سرویس‌هایی مثل Cloudflare (روش رایج و امن برای شرکت‌های کوچک و متوسط).</p>
+                            </div>
+                            <div class="flex-1">
+                                <strong class="text-white block mb-2 border-b border-white/10 pb-2">۲. Self-Hosted</strong>
+                                <p class="text-sm text-gray-400 leading-relaxed">راه‌اندازی سرور DNS در شبکه خودمان و پابلیش کردن آن در اینترنت تا ۱۰۰٪ کنترل دست خودمان باشد (نیازمند دقت امنیتی بالا).</p>
+                            </div>
+                        </div>
+
+                        <!-- Securing Self-Hosted DNS -->
+                        <div class="bg-gradient-to-l from-emerald-900/20 to-transparent p-6 rounded-2xl border-l-4 border-emerald-500">
+                            <h3 class="text-xl font-bold text-white mb-4"><i class="fa-solid fa-lock text-emerald-400 mr-2"></i> سناریوی امنیتی برای DNS داخلی</h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-5">
+                                باز کردن مستقیم پورت 53 از اینترنت به سرور DNS داخل شبکه (Server Farm) اشتباه محض است. معماری صحیح به این شکل پیاده‌سازی می‌شود:
+                            </p>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 font-bold">۱</div>
+                                    <p class="text-sm text-gray-400 leading-relaxed pt-1">
+                                        یک سرور DNS به عنوان <strong>Primary</strong> در داخل شبکه داخلی (امن) می‌سازیم که تمام رکوردهای شبکه در آن است.
+                                    </p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 font-bold">۲</div>
+                                    <p class="text-sm text-gray-400 leading-relaxed pt-1">
+                                        یک سرور DNS به عنوان <strong>Secondary</strong> در منطقه <strong>DMZ</strong> می‌سازیم. این سرور از طریق Zone Transfer اطلاعات را از Primary می‌گیرد.
+                                    </p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 font-bold">۳</div>
+                                    <p class="text-sm text-gray-400 leading-relaxed pt-1">
+                                        روی فایروال اینترنتی، قانون <strong>Port Forwarding</strong> را فقط برای هدایت پورت 53 (TCP/UDP) به سمت IP سرورِ مستقر در DMZ می‌نویسیم.
+                                    </p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded bg-accent/10 border border-accent/30 text-accent flex items-center justify-center shrink-0"><i class="fa-solid fa-eye-slash"></i></div>
+                                    <p class="text-sm text-gray-400 leading-relaxed pt-1">
+                                        <strong class="text-white">نکته طلایی:</strong> در زونی که به اینترنت پابلیش می‌شود، فقط رکوردهای اختصاصی مثل MX و Autodiscover را قرار می‌دهیم، تا هکر نتواند ساختار و نام سرورهای داخلی ما را با کوئری گرفتن، کشف کند.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: Versions & Compatibility -->
+            <section id="exchange-versions" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-code-branch text-accent"></i>
+                        تاریخچه نسخه‌ها و ماتریس سازگاری
+                    </h2>
+
+                    <div class="space-y-8">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                            <div class="bg-[#050b14] p-3 rounded-lg border border-white/5 text-center flex flex-col justify-center">
+                                <span class="font-bold text-gray-500 mb-1">2003</span>
+                                <span class="text-[10px] text-gray-600">منسوخ کامل</span>
+                            </div>
+                            <div class="bg-[#050b14] p-3 rounded-lg border border-white/5 text-center flex flex-col justify-center">
+                                <span class="font-bold text-white mb-1">2007</span>
+                                <span class="text-[10px] text-gray-400">۵ رول مجزا</span>
+                            </div>
+                            <div class="bg-[#050b14] p-3 rounded-lg border border-white/5 text-center flex flex-col justify-center">
+                                <span class="font-bold text-white mb-1">2010</span>
+                                <span class="text-[10px] text-gray-400">معرفی DAG</span>
+                            </div>
+                            <div class="bg-[#050b14] p-3 rounded-lg border border-white/5 text-center flex flex-col justify-center">
+                                <span class="font-bold text-white mb-1">2013</span>
+                                <span class="text-[10px] text-gray-400">کاهش به ۲ رول</span>
+                            </div>
+                            <div class="bg-accent/5 p-3 rounded-lg border border-accent/30 text-center flex flex-col justify-center">
+                                <span class="font-bold text-accent mb-1">2016</span>
+                                <span class="text-[10px] text-gray-300">تک رولی (MBX)</span>
+                            </div>
+                            <div class="bg-accent/10 p-3 rounded-lg border border-accent/50 text-center flex flex-col justify-center shadow-[0_0_15px_rgba(0,229,255,0.1)]">
+                                <span class="font-bold text-accent mb-1 text-lg">2019</span>
+                                <span class="text-[10px] text-white">پشتیبانی از Core</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5 border-r-4 border-r-orange-500">
+                            <h3 class="font-bold text-orange-400 mb-3 text-lg"><i class="fa-solid fa-scale-balanced mr-2"></i> سازگاری و پیش‌نیازها (Prerequisites)</h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                اکسچنج در نصب بسیار سخت‌گیر است. شما نمی‌توانید هر نسخه‌ای از اکسچنج را روی هر ویندوز سروری نصب کنید.
+                            </p>
+                            <ul class="list-disc list-inside text-sm text-gray-400 mt-3 space-y-2">
+                                <li><strong>Windows Server Compatibility:</strong> مثلاً Exchange 2019 صرفاً روی Windows Server 2019 و 2022 نصب می‌شود و از نسخه‌های قبلی پشتیبانی نمی‌کند.</li>
+                                <li><strong>AD Functional Level:</strong> نصب اکسچنج نیازمند ارتقای سطح عملکرد اکتیو دایرکتوری (Forest/Domain Functional Level) است (مثلاً نسخه 2019 حداقل Functional Level سطح 2012 R2 را طلب می‌کند).</li>
+                                <li>علاوه بر این، نیازمند نصب پیش‌نیازهای نرم‌افزاری متعددی مثل IIS، دات‌نت فریم‌ورک‌ها، و ماژول‌های مشخص ویندوزی پیش از شروع Setup است.</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.section-content');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = item.getAttribute('data-target');
+
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+
+                    sections.forEach(section => {
+                        section.classList.remove('active', 'fade-in');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                            // Trigger reflow to restart animation
+                            void section.offsetWidth; 
+                            section.classList.add('fade-in');
+                        }
+                    });
+
+                    // Close mobile sidebar after click
+                    if(window.innerWidth < 1024) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
+
+            function openMobileSidebar() {
+                sidebar.classList.remove('translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.add('translate-x-full');
+                sidebarOverlay.classList.remove('opacity-100');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+
+            mobileMenuBtn.addEventListener('click', openMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+        });
+    </script>
+</body>
+</html>
