@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Server | اپیزود ۲</title>
+    
+    <!-- Vazirmatn Font (Strictly Enforced) -->
+    <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Courier New", 'monospace']
+                    },
+                    colors: {
+                        accent: '#00e5ff',
+                        accentHover: '#33edff',
+                        darkBg: '#050b14',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Dark Theme & Background Pattern */
+        body {
+            font-family: 'Vazirmatn', sans-serif !important;
+            background-color: #050b14;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(0, 229, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(0, 229, 255, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-sidebar {
+            background: rgba(5, 10, 20, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0, 229, 255, 0.2);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Sections Toggle */
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050b14; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+
+        /* Monospace / Code Blocks */
+        .mono-inline {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0, 0, 0, 0.6);
+            color: #67e8f9;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+        
+        .code-block {
+            font-family: 'Courier New', Courier, monospace;
+            background: #000;
+            color: #a5b4fc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+        }
+
+        /* Sidebar active item styling */
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, transparent 100%);
+            border-right: 3px solid #00e5ff;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex selection:bg-accent selection:text-darkBg">
+
+    <!-- Mobile Header & Menu Toggle -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 h-16 glass-panel z-50 flex items-center justify-between px-6 border-b border-accent/20">
+        <div class="text-accent font-bold text-lg"><i class="fa-brands fa-microsoft me-2"></i>Exchange Server</div>
+        <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar (Right) -->
+    <aside id="sidebar" class="glass-sidebar w-72 fixed h-full right-0 top-0 z-40 transform translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col pt-16 lg:pt-0 shrink-0">
+        <div class="p-6 border-b border-white/5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center border border-accent/40 shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                <i class="fa-solid fa-layer-group text-accent text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg leading-tight">مستندات معماری</h1>
+                <p class="text-accent/80 text-sm mt-1">اپیزود ۲ : ساختار و نصب</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-2 custom-scrollbar">
+            <p class="px-4 text-xs font-semibold text-gray-500 mb-2 mt-2 tracking-wider">سرفصل‌های اپیزود</p>
+            
+            <a href="#" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="admin-tools">
+                <i class="fa-solid fa-terminal w-5 text-center"></i>
+                <span class="text-sm font-medium">ابزارهای مدیریت و EMS</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="editions-db">
+                <i class="fa-solid fa-server w-5 text-center"></i>
+                <span class="text-sm font-medium">نسخه‌ها، CU و دیتابیس</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="architecture-roles">
+                <i class="fa-solid fa-sitemap w-5 text-center"></i>
+                <span class="text-sm font-medium">معماری رول‌ها و Organization</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="ha-dag-lb">
+                <i class="fa-solid fa-network-wired w-5 text-center"></i>
+                <span class="text-sm font-medium">DAG و Load Balancing</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="ports-clients">
+                <i class="fa-solid fa-plug w-5 text-center"></i>
+                <span class="text-sm font-medium">پورت‌های SMTP و کلاینت‌ها</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="install-migration">
+                <i class="fa-solid fa-download w-5 text-center"></i>
+                <span class="text-sm font-medium">پیش‌نیاز نصب و Migration</span>
+            </a>
+        </nav>
+        <!-- NO FOOTER ALLOWED HERE (RED RULE 1) -->
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 lg:mr-72 min-h-screen pt-24 lg:pt-10 px-4 sm:px-8 lg:px-12 pb-16">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- SECTION 1: Admin Tools & EMS -->
+            <section id="admin-tools" class="section-content active fade-in">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-[60px] pointer-events-none"></div>
+                    
+                    <div class="inline-block px-3 py-1 rounded-md bg-accent/10 border border-accent/20 text-accent text-xs font-bold mb-5 tracking-wider">
+                        MANAGEMENT INTERFACES
+                    </div>
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-terminal text-accent"></i>
+                        ابزارهای مدیریت اکسچنج سرور
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <!-- EMS -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5 hover:border-accent/30 transition-all relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-1 h-full bg-accent"></div>
+                            <h3 class="font-bold text-white mb-3 text-lg flex items-center gap-2"><i class="fa-solid fa-code"></i> EMS (Exchange Management Shell)</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed text-justify mb-4">
+                                اکسچنج یک PowerShell بسیار قدرتمند و اختصاصی به نام <strong>EMS</strong> دارد که در پس‌زمینه ماژول‌های اکسچنج را لود می‌کند (صدها Cmdlet اختصاصی). 
+                            </p>
+                            <div class="bg-red-500/10 p-4 rounded-xl border border-red-500/20 text-sm text-red-200">
+                                <strong class="text-red-400 font-bold block mb-1"><i class="fa-solid fa-triangle-exclamation"></i> قانون طلایی EMS:</strong>
+                                همیشه و تحت هر شرایطی EMS را با <strong>Run as Administrator</strong> باز کنید! در غیر این صورت، به دلیل عدم دسترسی به ماژول‌های WMI و PS Remoting، دستورات شما با خطاهای Access Denied یا عدم شناسایی Cmdlet مواجه خواهند شد.
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- ECP -->
+                            <div class="bg-[#050b14]/60 p-6 rounded-2xl border border-white/5">
+                                <h3 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-globe text-blue-400"></i> کنسول ECP / EAC</h3>
+                                <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                    مخفف <strong>Exchange Control Panel</strong> (که به آن Exchange Admin Center یا EAC هم می‌گویند). این کنسول گرافیکی و تحت وب اکسچنج است. ادمین‌ها با وارد کردن آدرس <code class="mono-inline">https://ServerIP/ecp</code> در مرورگر، به محیط GUI متصل شده و دیتابیس‌ها، میل‌باکس‌ها و رول‌ها را مدیریت می‌کنند.
+                                </p>
+                            </div>
+                            <!-- HealthChecker -->
+                            <div class="bg-emerald-900/10 p-6 rounded-2xl border border-emerald-500/20">
+                                <h3 class="font-bold text-white mb-3 flex items-center gap-2 text-lg"><i class="fa-solid fa-stethoscope text-emerald-400"></i> اسکریپت Health Checker</h3>
+                                <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                    یک اسکریپت رسمی و حیاتی از سمت مایکروسافت (موجود در گیت‌هاب). این اسکریپت تمام سرور اکسچنج را اسکن کرده و یک گزارش با جزئیات خیره‌کننده (HTML/XML) شامل وضعیت آسیب‌پذیری‌ها (Vulnerabilities)، تنظیمات پرفورمنس (مثل تنظیمات کارت شبکه و Memory) و باگ‌های احتمالی ارائه می‌دهد.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Editions, DBs, CUs -->
+            <section id="editions-db" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-server text-accent"></i>
+                        نسخه‌ها، دیتابیس‌ها و آپدیت‌ها (CU)
+                    </h2>
+
+                    <div class="space-y-6">
+                        <!-- Editions -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-3">Editions: Standard vs Enterprise</h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                فایل نصب (ISO) اکسچنج برای هر دو نسخه یکی است و تفاوت صرفاً در <strong>لایسنس کی (Product Key)</strong> و محدودیت تعداد دیتابیس‌های قابل Mount شدن (روشن شدن) روی یک سرور است:
+                            </p>
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <div class="flex-1 bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                                    <strong class="text-accent text-lg block mb-1">Standard Edition</strong>
+                                    <span class="text-gray-400 text-sm">اجازه Mount کردن <strong>حداکثر ۵ دیتابیس</strong> (مناسب شرکت‌های کوچک/متوسط).</span>
+                                </div>
+                                <div class="flex-1 bg-gradient-to-br from-purple-900/30 to-transparent p-4 rounded-xl border border-purple-500/30 text-center">
+                                    <strong class="text-purple-400 text-lg block mb-1">Enterprise Edition</strong>
+                                    <span class="text-gray-400 text-sm">اجازه Mount کردن <strong>تا ۱۰۰ دیتابیس</strong> در هر سرور (طراحی شده برای کلاسترینگ بزرگ و DAG).</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Database Concept -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div class="bg-orange-500/10 p-6 rounded-2xl border border-orange-500/20">
+                                <h3 class="text-lg font-bold text-orange-400 mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-database"></i> ماهیت دیتابیس (Mailbox DB)
+                                </h3>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                    جایی که میل‌باکس‌ها (ایمیل‌های کاربران) ذخیره می‌شوند، <strong>دیتابیس</strong> (با پسوند .edb) نام دارد. 
+                                </p>
+                                <p class="text-sm text-gray-400 leading-relaxed text-justify mt-2">
+                                    <strong class="text-white">آیا محدودیت حجم دارد؟</strong> از نظر تئوری و معماری خیر! شما می‌توانید دیتابیسی با ظرفیت چندین ترابایت داشته باشید. اما Best Practice مایکروسافت می‌گوید برای سرورهای تکی حجم دیتابیس زیر 200GB و برای سرورهای کلاستر شده (DAG) نهایتاً تا 2TB باشد تا زمان Recovery در صورت خرابی طولانی نشود.
+                                </p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Trial Mode -->
+                                <div class="bg-[#050b14] p-5 rounded-2xl border border-white/5">
+                                    <h4 class="font-bold text-white mb-2 text-sm">حالت Trial (آزمایشگاه ۱۲۰ روزه)</h4>
+                                    <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                        اکسچنج پس از نصب تا <strong>۱۲۰ روز</strong> بدون لایسنس کار می‌کند. جالب اینجاست که مایکروسافت می‌گوید پس از این مدت <strong>هیچگونه اختلالی در کارکرد ایمیل‌ها (Send/Receive)</strong> ایجاد نمی‌شود! فقط سرور در کنسول اخطار می‌دهد و اجازه ساخت دیتابیس‌های جدید یا استفاده از ویژگی‌های پیشرفته Enterprise را از شما می‌گیرد.
+                                    </p>
+                                </div>
+                                <!-- CU -->
+                                <div class="bg-[#050b14] p-5 rounded-2xl border border-white/5">
+                                    <h4 class="font-bold text-white mb-2 text-sm text-accent">مفهوم CU (Cumulative Update)</h4>
+                                    <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                        مایکروسافت برای اکسچنج آپدیت‌های تجمیعی (معمولاً فصلی یا نیم‌ساله) به نام <strong>CU</strong> ارائه می‌دهد. نکته بسیار مهم: هر CU فقط یک پچ (Patch) ساده نیست، بلکه <strong>یک نسخه کامل (Full Installation)</strong> از اکسچنج است! برای همین حجم آن‌ها چندین گیگابایت است.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Architecture, Roles & Org -->
+            <section id="architecture-roles" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-sitemap text-accent"></i>
+                        معماری، Exchange Organization و نقش‌ها
+                    </h2>
+
+                    <div class="space-y-8">
+                        
+                        <!-- Exchange Org -->
+                        <div class="bg-blue-900/20 p-6 rounded-2xl border-l-4 border-blue-500">
+                            <h3 class="text-xl font-bold text-blue-400 mb-2">Exchange Organization چیست؟</h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                وقتی اکسچنج را نصب می‌کنید، در بالاترین سطح منطقی خود، در پارتیشن Configurationِ اکتیو دایرکتوری یک مرز یا ظرف (Container) بزرگ می‌سازد که به آن <strong>Exchange Organization</strong> می‌گویند.
+                                تمام سرورهای اکسچنج، پالیسی‌ها، کانفیگ‌ها و دیتابیس‌ها داخل این مرز قرار می‌گیرند. <strong class="text-white">شما در هر Forest اکتیو دایرکتوری، فقط و فقط می‌توانید یک Exchange Organization داشته باشید.</strong>
+                            </p>
+                        </div>
+
+                        <!-- 2019 Roles -->
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-2">لایه‌ها و نقش‌های اکسچنج (در معماری ۲۰۱۶ / ۲۰۱۹)</h3>
+                            <p class="text-[15px] text-gray-400 leading-relaxed text-justify mb-5">
+                                در نسخه‌های جدید (۲۰۱۶ به بعد)، معماری تجمیع شده است و ما عملاً فقط با <strong>۲ نقش اصلی</strong> روبرو هستیم:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <!-- Mailbox Role -->
+                                <div class="bg-black/40 p-6 rounded-xl border border-white/5 relative">
+                                    <div class="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center absolute -top-4 -right-4 border border-accent/40">
+                                        <i class="fa-solid fa-database text-accent text-xl"></i>
+                                    </div>
+                                    <h4 class="font-bold text-white mb-3 text-lg">1. Mailbox Role (همه کاره)</h4>
+                                    <p class="text-sm text-gray-400 leading-relaxed text-justify mb-3">
+                                        این رول اکنون نقش قلب سیستم را دارد. دیتابیس‌ها در این رول قرار می‌گیرند. جالب است بدانید نقش <strong>CAS (Client Access Services)</strong> که قبلاً جدا بود، اکنون به عنوان یک "سرویس" در دل Mailbox Role قرار گرفته است. 
+                                    </p>
+                                    <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                        <strong>نقش CAS:</strong> کلاینت‌ها (کاربران) مستقیماً به دیتابیس وصل نمی‌شوند! آن‌ها به واسطی به نام CAS وصل می‌شوند. CAS به عنوان یک Proxy عمل کرده، هویت کاربر را تایید کرده و درخواست او را به سمت دیتابیس مربوطه در بک‌اند هدایت می‌کند.
+                                    </p>
+                                </div>
+
+                                <!-- Edge Role -->
+                                <div class="bg-black/40 p-6 rounded-xl border border-white/5 relative">
+                                    <div class="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center absolute -top-4 -right-4 border border-orange-500/40">
+                                        <i class="fa-solid fa-shield-halved text-orange-400 text-xl"></i>
+                                    </div>
+                                    <h4 class="font-bold text-white mb-3 text-lg">2. Edge Transport Role</h4>
+                                    <p class="text-sm text-gray-400 leading-relaxed text-justify mb-3">
+                                        همانطور که در اپیزود قبل گفته شد، این سرور در لبه شبکه (DMZ) نصب می‌شود، وظیفه Anti-Spam دارد و قانون مطلق آن این است که <strong>باید به صورت Workgroup نصب شود</strong> (هرگز نباید عضو دامین باشد).
+                                    </p>
+                                    <div class="bg-white/5 p-3 rounded mt-3 border border-white/10">
+                                        <strong class="text-xs text-gray-300 block mb-1">Unified Messaging (UM) چه شد؟</strong>
+                                        <span class="text-xs text-gray-500 text-justify block">سیستم یکپارچه پیام‌گیر صوتی و ادغام با VoIP (سانترال) که در نسخه‌های قبلی وجود داشت، در Exchange 2019 <strong>به طور کامل حذف شده است</strong> و مایکروسافت این سرویس را به بستر Skype for Business / Microsoft Teams منتقل کرده است.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: DAG & Load Balancing -->
+            <section id="ha-dag-lb" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-network-wired text-accent"></i>
+                        کلاسترینگ (DAG) و معماری Load Balancing
+                    </h2>
+
+                    <div class="space-y-6">
+                        
+                        <!-- DAG Concept -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-cubes text-accent"></i> مفهوم DAG (Database Availability Group)
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                برای ایجاد High Availability (HA) در دیتابیس‌های اکسچنج از ویژگی <strong>DAG</strong> استفاده می‌شود. زیرساخت DAG بر پایه ویژگی <strong>Windows Failover Cluster</strong> ویندوز سرور بنا شده است. 
+                                DAG با رپلیکیت کردن (کپی کردن) بلاک‌های دیتابیس بین چند سرور، کاری می‌کند که اگر یک سرور خاموش شد، دیتابیس فوراً روی سرور دوم (Passive) اکتیو و Mount شود تا دیتایی از دست نرود.
+                            </p>
+                        </div>
+
+                        <!-- LB Requirement -->
+                        <div class="bg-red-900/20 p-6 rounded-2xl border-l-4 border-red-500">
+                            <h3 class="text-lg font-bold text-red-400 mb-3"><i class="fa-solid fa-triangle-exclamation"></i> نقطه ضعف DAG و نیاز قطعی به Load Balancer</h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                وقتی DAG می‌سازیم و سرور ۱ (اکتیو) از دسترس خارج می‌شود، دیتابیس اتوماتیک روی سرور ۲ بالا می‌آید. <strong>اما اتصال کاربران (کلاینت‌ها) چه می‌شود؟</strong>
+                            </p>
+                            <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                اکسچنج به خودیِ خود نمی‌تواند کاربر را متوجه کند که به سرور دوم (IP جدید) وصل شود! کلاینت‌ها برای اتصال به CAS نیاز به یک IP ثابت (VIP) دارند. از آنجایی که اکسچنج نصب NLB و DAG را روی یک سرور <strong>پشتیبانی نمی‌کند</strong>، ما نیاز قطعی به یک <strong>لود بالانسر سخت‌افزاری یا نرم‌افزاری لایه ۷ (مانند F5 Big-IP، HAProxy یا Kemp)</strong> جلوی سرورهای اکسچنج داریم تا ترافیک کاربر (Outlook/OWA) را همیشه به سمت سرور زنده و سالم هدایت کند.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Ports & Clients -->
+            <section id="ports-clients" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-plug text-accent"></i>
+                        پورت‌های حیاتی SMTP و پروتکل‌های کلاینت
+                    </h2>
+
+                    <div class="space-y-6">
+                        
+                        <!-- SMTP Ports -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-3">آناتومی پورت‌های SMTP در اکسچنج</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10 flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center font-mono font-bold text-accent text-lg shrink-0">25</div>
+                                    <div>
+                                        <strong class="text-white text-sm block mb-1">Server-to-Server</strong>
+                                        <p class="text-xs text-gray-400 text-justify">پورت استاندارد SMTP. برای دریافت ایمیل از دنیای اینترنت (توسط سرورهای دیگر مثل Gmail) و یا ارتباطات داخلی خود سرورها.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10 flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-mono font-bold text-blue-400 text-lg shrink-0">587</div>
+                                    <div>
+                                        <strong class="text-white text-sm block mb-1">Client Submission (Authenticated)</strong>
+                                        <p class="text-xs text-gray-400 text-justify">پورت استاندارد برای ارسال ایمیل توسط کلاینت‌ها (مثل Outlook یا اپلیکیشن‌های موبایل). نیاز به احراز هویت (Auth) دارد.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10 flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center font-mono font-bold text-orange-400 text-lg shrink-0">465</div>
+                                    <div>
+                                        <strong class="text-white text-sm block mb-1">SMTPS (Implicit SSL)</strong>
+                                        <p class="text-xs text-gray-400 text-justify">پورت رمزنگاری شده قدیمی SMTP. با وجود اینکه متد STARTTLS روی 587 مدرن‌تر است، اما هنوز توسط بسیاری از دستگاه‌ها (مثل پرینترها) پشتیبانی می‌شود.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gradient-to-r from-purple-900/20 to-transparent p-4 rounded-xl border border-purple-500/30 flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-lg bg-purple-500/20 border border-purple-500/50 flex items-center justify-center font-mono font-bold text-purple-400 text-lg shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.3)]">2525</div>
+                                    <div>
+                                        <strong class="text-purple-300 text-sm block mb-1">Internal Proxy Routing</strong>
+                                        <p class="text-xs text-gray-400 text-justify">پورت پنهان و بسیار مهم در معماری جدید! سرویس Front End (CAS) ایمیل را روی 25 می‌گیرد و آن را به صورت پروکسی روی پورت <strong>2525</strong> برای سرویس Hub Transport (بک‌اند) در دل Mailbox Role ارسال می‌کند.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Client Protocols -->
+                        <div class="bg-[#050b14]/60 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">پروتکل‌های کلاینت (اتصال کاربران به CAS)</h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                کلاینت‌ها از طریق پروتکل‌های مختلفی با واسط CAS ارتباط برقرار می‌کنند (مثل POP3 و IMAP برای کلاینت‌های قدیمی). اما مهم‌ترین آن‌ها برای نرم‌افزار Outlook عبارت است از:
+                            </p>
+                            <div class="bg-accent/10 p-4 rounded-lg border-l-4 border-accent">
+                                <strong class="text-accent text-base block mb-2">MAPI Client / Exchange Client</strong>
+                                <p class="text-sm text-gray-400 leading-relaxed text-justify">
+                                    نرم‌افزار Outlook (به عنوان بهترین کلاینت اکسچنج) در گذشته از پروتکل RPC over HTTP (یا Outlook Anywhere) استفاده می‌کرد. اما در نسخه‌های مدرن (۲۰۱۶ به بعد)، از پروتکل بسیار بهینه‌تر <strong>MAPI over HTTP</strong> استفاده می‌کند. این پروتکل سرعت اتصال مجدد پس از قطعی شبکه (Resume) را به شدت کاهش داده و پایداری کلاینت را بالا می‌برد.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SECTION 6: Migration & Installation -->
+            <section id="install-migration" class="section-content">
+                <div class="glass-panel rounded-3xl p-8 sm:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-download text-accent"></i>
+                        پیش‌نیازها، Migration و پروسه نصب
+                    </h2>
+
+                    <div class="space-y-8">
+                        
+                        <!-- 2016 vs 2019 & Migration -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="font-bold text-accent mb-3 text-lg">Exchange 2016 vs 2019</h3>
+                                <ul class="list-disc list-inside text-sm text-gray-400 space-y-2">
+                                    <li>نصب روی Windows Server Core (امنیت بسیار بالاتر، فقط در 2019).</li>
+                                    <li>ویژگی MCDB (MetaCache Database) در 2019: استفاده از هاردهای SSD برای کش کردن اطلاعات داغ و دیتابیس‌ها روی هاردهای ارزان‌تر HDD.</li>
+                                    <li>تخصیص حافظه دینامیک بهتر و معماری جستجوی (Search) بهینه‌تر بر پایه Bing در 2019.</li>
+                                    <li>حذف کامل رول Unified Messaging (UM) در 2019.</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-orange-900/10 p-6 rounded-2xl border border-orange-500/20">
+                                <h3 class="font-bold text-orange-400 mb-3 text-lg"><i class="fa-solid fa-truck-fast"></i> قانون Migration چندمرحله‌ای</h3>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                    اکسچنج در آپگرید سخت‌گیر است. شما <strong>نمی‌توانید</strong> به صورت مستقیم از نسخه‌های قدیمی (مثلاً 2010) به نسخه 2019 کوچ کنید (Co-existence مستقیم پشتیبانی نمی‌شود).
+                                    ابتدا باید محیط 2010 را به <strong>2016</strong> ارتقا دهید، میل‌باکس‌ها را جابجا کنید، سرور 2010 را از مدار خارج کنید و سپس از 2016 به <strong>2019</strong> ارتقا دهید.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Installation Pre-reqs -->
+                        <div class="bg-[#050b14] p-6 rounded-2xl border border-white/5">
+                            <h3 class="font-bold text-white mb-4 text-lg border-b border-white/10 pb-2">پیش‌نیازهای نرم‌افزاری سرور</h3>
+                            <p class="text-sm text-gray-400 mb-3">قبل از اجرای Setup، سرور ویندوزی باید کاملاً آماده باشد:</p>
+                            <ul class="list-disc list-inside text-sm text-gray-300 space-y-2">
+                                <li>نصب فیچرهای ویندوز (IIS, RSAT-ADDS و غیره) با دستور PowerShell.</li>
+                                <li>نصب پکیج <strong>.NET Framework</strong> (نسخه دقیق مطابق با ماتریس سازگاری CU).</li>
+                                <li>نصب <strong>C++ Redistributable</strong>.</li>
+                                <li>نصب UCMA (Unified Communications Managed API) - در صورت نیاز.</li>
+                            </ul>
+                        </div>
+
+                        <!-- AD Preparation Commands -->
+                        <div class="bg-black/60 p-6 rounded-2xl border border-accent/20">
+                            <h3 class="font-bold text-accent mb-4 text-lg"><i class="fa-solid fa-terminal mr-2"></i> آماده‌سازی Active Directory (AD Prep)</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed text-justify mb-4">
+                                نصب اکسچنج، تغییرات ساختاری عمیقی در دیتابیس اکتیو دایرکتوری ایجاد می‌کند. این دستورات را می‌توانید روی خود Domain Controller، یا روی سروری که قرار است اکسچنج شود (بشرط نصب بودن ماژول RSAT) در مسیر فایل Setup اجرا کنید:
+                            </p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <span class="text-white text-sm font-bold">1. آماده‌سازی Schema (توسعه فیلدهای AD):</span>
+                                    <div class="code-block text-xs md:text-sm">
+                                        Setup.exe /PrepareSchema /IAcceptExchangeServerLicenseTerms_DiagnosticDataON
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="text-white text-sm font-bold">2. آماده‌سازی Organization (ساخت کانتینرها):</span>
+                                    <div class="code-block text-xs md:text-sm">
+                                        Setup.exe /PrepareAD /OrganizationName:"YourOrgName" /IAcceptExchangeServerLicenseTerms_DiagnosticDataON
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="text-white text-sm font-bold">3. آماده‌سازی Domain (تنظیم پرمیشن‌ها):</span>
+                                    <div class="code-block text-xs md:text-sm">
+                                        Setup.exe /PrepareDomain /IAcceptExchangeServerLicenseTerms_DiagnosticDataON
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-4"><i class="fa-solid fa-circle-info mr-1"></i> نکته: سویچ <code class="mono-inline">/IAcceptExchange...</code> در نسخه‌ها و CUهای جدید اجباری شده است.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.section-content');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = item.getAttribute('data-target');
+
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+
+                    sections.forEach(section => {
+                        section.classList.remove('active', 'fade-in');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                            // Trigger reflow to restart animation
+                            void section.offsetWidth; 
+                            section.classList.add('fade-in');
+                        }
+                    });
+
+                    // Close mobile sidebar after click
+                    if(window.innerWidth < 1024) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
+
+            function openMobileSidebar() {
+                sidebar.classList.remove('translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.add('translate-x-full');
+                sidebarOverlay.classList.remove('opacity-100');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+
+            mobileMenuBtn.addEventListener('click', openMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+        });
+    </script>
+</body>
+</html>
