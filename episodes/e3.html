@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Server | اپیزود ۳</title>
+    
+    <!-- Vazirmatn Font (Strictly Enforced) -->
+    <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Courier New", 'monospace']
+                    },
+                    colors: {
+                        accent: '#00e5ff',
+                        accentHover: '#33edff',
+                        darkBg: '#050b14',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Dark Theme & Background Pattern */
+        body {
+            font-family: 'Vazirmatn', sans-serif !important;
+            background-color: #050b14;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(0, 229, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(0, 229, 255, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-sidebar {
+            background: rgba(5, 10, 20, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0, 229, 255, 0.2);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Sections Toggle */
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #050b14; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+
+        /* Monospace / Code Blocks */
+        .mono-inline {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0, 0, 0, 0.6);
+            color: #67e8f9;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+        
+        .code-block {
+            font-family: 'Courier New', Courier, monospace;
+            background: #000;
+            color: #a5b4fc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* Sidebar active item styling */
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, transparent 100%);
+            border-right: 3px solid #00e5ff;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex selection:bg-accent selection:text-darkBg">
+
+    <!-- Mobile Header & Menu Toggle -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 h-16 glass-panel z-50 flex items-center justify-between px-6 border-b border-accent/20">
+        <div class="text-accent font-bold text-lg"><i class="fa-brands fa-microsoft me-2"></i>Exchange Server</div>
+        <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar (Right) -->
+    <aside id="sidebar" class="glass-sidebar w-72 fixed h-full right-0 top-0 z-40 transform translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col pt-16 lg:pt-0 shrink-0">
+        <div class="p-6 border-b border-white/5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center border border-accent/40 shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                <i class="fa-solid fa-users-gear text-accent text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg leading-tight">مستندات معماری</h1>
+                <p class="text-accent/80 text-sm mt-1">اپیزود ۳ : مدیریت Mailboxها</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-2 custom-scrollbar">
+            <p class="px-4 text-xs font-semibold text-gray-500 mb-2 mt-2 tracking-wider">سرفصل‌های اپیزود</p>
+            
+            <a href="#" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="identity-domains">
+                <i class="fa-solid fa-id-card w-5 text-center"></i>
+                <span class="text-sm font-medium">دامین، Alias، UPN و اتریبیوت‌ها</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="mailbox-lifecycle">
+                <i class="fa-solid fa-recycle w-5 text-center"></i>
+                <span class="text-sm font-medium">حذف، بازیابی و Information Store</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="security-access">
+                <i class="fa-solid fa-user-lock w-5 text-center"></i>
+                <span class="text-sm font-medium">کشینگ لاگین، قطع دسترسی و پسورد</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="recipient-types">
+                <i class="fa-solid fa-address-book w-5 text-center"></i>
+                <span class="text-sm font-medium">انواع گیرندگان و خروجی PST</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="features-archive">
+                <i class="fa-solid fa-box-archive w-5 text-center"></i>
+                <span class="text-sm font-medium">فیچرها، Retention و آرشیو</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="mailflow-delegation">
+                <i class="fa-solid fa-paper-plane w-5 text-center"></i>
+                <span class="text-sm font-medium">دلیوری، تفویض اختیار و Recall</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 lg:mr-72 min-h-screen pt-24 lg:pt-10 px-4 sm:px-8 lg:px-12 pb-16">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- SECTION 1: Identity, Domains, Alias vs UPN, OU Bulk, Custom Attributes -->
+            <section id="identity-domains" class="section-content active fade-in">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-[60px] pointer-events-none"></div>
+                    
+                    <div class="inline-block px-3 py-1 rounded-md bg-accent/10 border border-accent/20 text-accent text-xs font-bold mb-5 tracking-wider">
+                        IDENTITY & ATTRIBUTES
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-id-card text-accent"></i>
+                        ساختار نام دامین، UPN، Alias و اتریبیوت‌ها
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <!-- Domain Name vs Email Domain -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-1 h-full bg-accent"></div>
+                            <h3 class="font-bold text-white mb-3 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-globe text-accent"></i> استقلال نام دامین Active Directory از دامنه ایمیل
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-3">
+                                یک باور غلط رایج این است که نام دامین اکتیو دایرکتوری حتماً باید با پسوند ایمیل کاربران یکی باشد؛ در حالی که <strong>نام دامین داخلی هیچ الزامی به یکسان بودن با نام دامنه اکسچنج و ایمیل ندارد!</strong>
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-accent text-sm block mb-1">حالت متفاوت (Split Namespace):</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                        ممکن است دامین شرکت شما <code class="mono-inline">corp.local</code> باشد، اما با تعریف یک <strong>Accepted Domain</strong> در اکسچنج، آدرس ایمیلی که کاربر در Outlook می‌بیند <code class="mono-inline">user@company.com</code> باشد.
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-emerald-400 text-sm block mb-1">حالت یکسان (Best Practice):</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                        می‌توانیم یک UPN Suffix اضافه کنیم تا نام لاگین کاربر در ویندوز و آدرس ایمیل او در اوت‌لوک کاملاً یکسان باشد (مثلاً هر دو <code class="mono-inline">ali@company.com</code> باشند) تا کاربر گیج نشود.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alias vs UPN -->
+                        <div class="bg-[#050b14]/60 p-6 rounded-2xl border border-white/5">
+                            <h3 class="font-bold text-white mb-4 text-lg border-b border-white/10 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-code-compare text-purple-400"></i> تفاوت دقیق Alias و UPN هنگام ساخت کاربر در اکسچنج
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-purple-900/10 p-5 rounded-xl border border-purple-500/20">
+                                    <h4 class="font-bold text-purple-400 text-base mb-2">User Principal Name (UPN)</h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                        شناسه هویتی و <strong>نام کاربری لاگین (Logon Name)</strong> در اکتیو دایرکتوری است که به فرمت ایمیل نوشته می‌شود (مانند <code class="mono-inline">a.rezaei@domain.local</code>). کاربر با این عبارت در ویندوز، OWA و اوت‌لوک احراز هویت (Authenticate) می‌کند.
+                                    </p>
+                                </div>
+                                <div class="bg-blue-900/10 p-5 rounded-xl border border-blue-500/20">
+                                    <h4 class="font-bold text-blue-400 text-base mb-2">Alias (Mail Nickname)</h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                        یک صفت اختصاصی اکسچنج است (بدون علامت @ و دامین). <strong>Alias</strong> نام مستعار ایمیلی کاربر است که قوانین <em>Email Address Policy</em> بر اساس آن، آدرس ایمیل اصلی (Primary SMTP Address) را می‌سازند (مثلاً اگر Alias را <code class="mono-inline">info.sales</code> بگذارید، ایمیلش <code class="mono-inline">info.sales@company.com</code> می‌شود، حتی اگر UPN او چیز دیگری باشد).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bulk Enable Mailbox for OU -->
+                        <div class="bg-black/60 p-6 rounded-2xl border border-accent/20">
+                            <h3 class="font-bold text-accent mb-3 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-terminal"></i> ساخت دسته‌جمعی میل‌باکس برای یک OU کامل
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                اگر از قبل صدها یوزر در یک Organizational Unit (OU) در اکتیو دایرکتوری داشته باشیم، نیازی نیست تک‌تک در محیط گرافیکی برایشان میل‌باکس بسازیم! با یک خط دستور در <strong>EMS</strong> کل آن OU را صاحب میل‌باکس می‌کنیم:
+                            </p>
+                            <div class="code-block text-xs sm:text-sm">
+                                Get-User -OrganizationalUnit "OU=Finance,DC=company,DC=local" -RecipientTypeDetails User | Enable-Mailbox -Database "DB01"
+                            </div>
+                            <p class="text-xs text-gray-400 mt-3">
+                                <i class="fa-solid fa-circle-info text-accent me-1"></i> فیلتر <code class="mono-inline">-RecipientTypeDetails User</code> تضمین می‌کند که دستور فقط روی کاربرانی اجرا شود که هنوز میل‌باکس ندارند.
+                            </p>
+                        </div>
+
+                        <!-- 15 Custom Attributes -->
+                        <div class="bg-amber-500/10 p-6 rounded-2xl border border-amber-500/20">
+                            <h3 class="font-bold text-amber-400 mb-3 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-tags"></i> ۱۵ اتریبیوت سفارشی (Custom Attributes 1-15) چیست؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                زمانی که Schema اکتیو دایرکتوری را برای اکسچنج آماده می‌کنیم (<code class="mono-inline">/PrepareSchema</code>)، اکسچنج به ازای هر کاربر <strong>۱۵ فیلد خالی اختصاصی</strong> به نام‌های <code class="mono-inline">CustomAttribute1</code> تا <code class="mono-inline">CustomAttribute15</code> در دیتابیس AD اضافه می‌کند.
+                            </p>
+                            <div class="bg-[#050b14]/80 p-4 rounded-xl border border-white/5 text-xs sm:text-sm text-gray-400 leading-relaxed text-justify">
+                                <strong class="text-white block mb-1">کاربرد مهندسی در سازمان چیست؟</strong>
+                                فرض کنید می‌خواهید اطلاعاتی مثل «کد پرسنلی»، «نوع قرارداد (رسمی/پیمانی)»، «طبقه ساختمان» یا «کد مرکز هزینه» را به کاربر بدهید که در فیلدهای استاندارد AD وجود ندارد. شما این مقادیر را در این ۱۵ اتریبیوت می‌نویسید و سپس می‌توانید بر اساس آن‌ها <strong>Dynamic Distribution Group</strong> (گروه‌های ایمیلی پویا)، <strong>Transport Rules</strong> یا <strong>Email Address Policy</strong>های هوشمند بنویسید!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Mailbox Lifecycle, Deletion, Recovery, Information Store -->
+            <section id="mailbox-lifecycle" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-recycle text-accent"></i>
+                        چرخه حیات میل‌باکس: حذف، بازیابی و سرویس Information Store
+                    </h2>
+
+                    <div class="space-y-6">
+                        <!-- Delete User Behavior & 30 Days Retention -->
+                        <div class="bg-red-500/10 p-6 rounded-2xl border-r-4 border-red-500">
+                            <h3 class="text-lg font-bold text-red-400 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-trash-can"></i> هنگام حذف کاربر در اکسچنج چه اتفاقی می‌افتد؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-4">
+                                بسیار مراقب باشید! اگر وارد پنل اکسچنج (ECP) شوید و یک میل‌باکس را <strong>Delete (Remove)</strong> کنید، نه تنها میل‌باکس و تنظیمات اکسچنج او قطع می‌شود، بلکه <strong class="text-red-300 underline underline-offset-4">کل اکانت کاربر از داخل Active Directory نیز به طور کامل حذف می‌شود!</strong> (اگر فقط می‌خواهید ایمیلش قطع شود ولی یوزر AD بماند، باید گزینه <strong>Disable</strong> را بزنید).
+                            </p>
+                            <div class="bg-[#050b14] p-4 rounded-xl border border-white/10">
+                                <strong class="text-accent text-sm block mb-1"><i class="fa-solid fa-clock-rotate-left me-1"></i> قانون نگهداری ۳۰ روزه (Mailbox Retention):</strong>
+                                <p class="text-xs sm:text-sm text-gray-400 leading-relaxed text-justify">
+                                    وقتی میل‌باکس حذف یا دیسیبل می‌شود، دیتای آن بلافاصله از دیتابیس پاک نمی‌شود! بلکه به حالت <strong>Disconnected Mailbox</strong> درآمده و به صورت پیش‌فرض تا <strong>۳۰ روز</strong> در دیتابیس باقی می‌ماند. این عدد در تنظیمات هر دیتابیس (تب <em>Limits > Keep deleted mailboxes for days</em>) کاملاً قابل تغییر است.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Reconnecting & Soft-Deleted -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="text-lg font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-plug-circle-check"></i> بازیابی و اتصال به کاربر دیگر
+                                </h3>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                    تا قبل از اتمام مهلت ۳۰ روزه، ادمین می‌تواند از مسیر <code class="mono-inline">Recipients > Mailboxes > ... > Connect a mailbox</code> میل‌باکس حذف‌شده را ببیند و دوباره وصل کند.
+                                </p>
+                                <div class="bg-emerald-900/20 p-3.5 rounded-xl border border-emerald-500/30 text-xs text-gray-300 leading-relaxed text-justify">
+                                    <strong class="text-emerald-300 block mb-1">نکته طلایی مصاحبه:</strong>
+                                    شما حتی می‌توانید میل‌باکسِ شخص حذف‌شده را به <strong>یک یوزر کاملاً متفاوت</strong> در اکتیو دایرکتوری وصل کنید (مثلاً جایگزین او در شرکت)؛ تنها شرطش این است که یوزرِ مقصد، <strong class="text-white">از قبل برای خودش میل‌باکس فعالی نداشته باشد!</strong>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="text-lg font-bold text-purple-400 mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-ghost"></i> Soft-Deleted Mailbox چیست؟
+                                </h3>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                    در اکسچنج، میل‌باکس‌های Disconnected به دو دسته تقسیم می‌شوند:
+                                </p>
+                                <ul class="list-disc list-inside text-xs sm:text-sm text-gray-400 space-y-2 mt-3 text-justify">
+                                    <li><strong class="text-white">Disabled:</strong> میل‌باکسی که در کنسول اکسچنج Disable یا Delete شده است.</li>
+                                    <li><strong class="text-purple-300">Soft-Deleted:</strong> زمانی که یک میل‌باکس را از دیتابیس A به دیتابیس B منتقل (Move/Migrate) می‌کنید، اکسچنج پس از پایان انتقال، نسخه موجود در دیتابیس مبدا (A) را فوراً پاک نمی‌کند؛ بلکه آن را در وضعیت <strong>Soft-Deleted</strong> قرار می‌دهد تا در صورت بروز خطا تا پایان دوره Retention قابل بازیابی باشد.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Permanently Delete (Purge) -->
+                        <div class="bg-black/60 p-6 rounded-2xl border border-red-500/30">
+                            <h3 class="font-bold text-white mb-3 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-fire-burner text-red-500"></i> حذف دائمی و غیرقابل بازگشت (Permanently Delete)
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                از طریق محیط گرافیکی (ECP) نمی‌توان میل‌باکس را به صورت آنی و دائمی (قبل از ۳۰ روز) نابود کرد. برای اینکه فضای دیتابیس فوراً خالی شود یا ایمیل‌های محرمانه کاملاً پاک شوند، <strong>فقط باید از PowerShell (EMS)</strong> استفاده کنیم:
+                            </p>
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-xs text-gray-400">حالت ۱: حذف دائمی یک میل‌باکس فعال به همراه یوزر AD در یک مرحله:</span>
+                                    <div class="code-block text-xs sm:text-sm">
+                                        Remove-Mailbox -Identity "ali@company.com" -Permanent $true
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-gray-400">حالت ۲: پاکسازی کامل میل‌باکسی که قبلاً حذف شده و الان در لیست Disconnected (یا Soft-Deleted) است:</span>
+                                    <div class="code-block text-xs sm:text-sm">
+                                        Get-MailboxStatistics -Database "DB01" | Where {$_.DisconnectReason -ne $null} | Format-List DisplayName, MailboxGuid, DisconnectReason<br>
+                                        Remove-StoreMailbox -Database "DB01" -Identity "&lt;MailboxGuid&gt;" -MailboxState Disabled
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-red-400 mt-4 font-bold">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i> هشدار حیاتی: اگر میل‌باکسی به روش Permanently Delete پاک شود، دیگر در اکسچنج وجود ندارد و <span class="underline">تنها راه برگرداندن آن، Restore کردن دیتابیس از روی Backup است!</span>
+                            </p>
+                        </div>
+
+                        <!-- Information Store Service -->
+                        <div class="bg-gradient-to-l from-accent/15 to-transparent p-6 rounded-2xl border-r-4 border-accent">
+                            <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-kit-medical text-accent"></i> دوای درد اکسچنج: سرویس Information Store
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                سرویس <strong>Microsoft Exchange Information Store</strong> (با نام سیستمی <code class="mono-inline">MSExchangeIS</code>) قلب مدیریت دیتابیس‌های اکسچنج است. چون اکسچنج برای پرفورمنس بالا، اطلاعات اکتیو دایرکتوری و وضعیت میل‌باکس‌ها را در RAM خود کش (Cache) می‌کند، گاهی تغییرات شما (مثل حذف میل‌باکس، تغییر پرمیشن‌ها یا سهمیه‌ها) بلافاصله اعمال نمی‌شود.
+                            </p>
+                            <div class="code-block text-xs sm:text-sm">
+                                Restart-Service MSExchangeIS
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">
+                                ری‌استارت کردن این سرویس (یا اجرای دستور <code class="mono-inline">Clean-MailboxDatabase</code>) کش را خالی کرده و خیلی اوقات دوای درد گیر کردن‌های عجیب اکسچنج است! (البته در حین ری‌استارت، دیتابیس‌ها برای چند ثانیه Dismount/Mount می‌شوند).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Security, AD Disable Caching, Passwords -->
+            <section id="security-access" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-user-lock text-accent"></i>
+                        تله‌ی کشینگ Active Directory، قطع فوری دسترسی و مدیریت پسورد
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- Disabling AD Account vs Exchange Cache -->
+                        <div class="bg-red-900/20 p-6 rounded-2xl border border-red-500/30 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-1.5 h-full bg-red-500"></div>
+                            <h3 class="text-xl font-bold text-red-400 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-stopwatch"></i> چرا Disable کردن اکانت در AD دسترسی ایمیل را فوراً قطع نمی‌کند؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-4">
+                                یکی از خطرناک‌ترین تله‌های امنیتی برای ادمین‌ها این است که فکر می‌کنند وقتی یک کارمند اخراج می‌شود و اکانت او را در <em>Active Directory Users and Computers</em> در وضعیت <strong>Disable</strong> قرار می‌دهند، همه‌چیز تمام شده است!
+                            </p>
+                            <div class="bg-black/50 p-4 rounded-xl border border-red-500/20 mb-4">
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify">
+                                    <strong class="text-white">واقعیت فنی:</strong> به دلیل مکانیزم <strong>Token Caching</strong> در سرویس IIS، کش شدن سشن‌های MAPI در Outlook و توکن‌های ActiveSync روی موبایل، کاربر دیسیبل‌شده <strong class="text-red-400">حداقل ۱۵ دقیقه و گاهی تا ۲ ساعت (یا بیشتر)</strong> همچنان به ایمیل‌های خود دسترسی دارد و می‌تواند ایمیل بفرستد یا دیتای شرکت را سرقت کند!
+                                </p>
+                            </div>
+                            <h4 class="font-bold text-white text-sm mb-2"><i class="fa-solid fa-bolt text-amber-400 me-1"></i> راهکار قطع فوری و ثانیه‌ای دسترسی (Emergency Cut-off):</h4>
+                            <ol class="list-decimal list-inside text-xs sm:text-sm text-gray-300 space-y-2 leading-relaxed">
+                                <li>وارد پنل اکسچنج (ECP) شوید، روی یوزر دابل‌کلیک کرده و به تب <strong>Mailbox Features</strong> بروید.</li>
+                                <li>تمامی پروتکل‌های ارتباطی او شامل <strong>OWA (Outlook on the web)</strong>، <strong>Exchange ActiveSync</strong>، <strong>MAPI</strong>، <strong>IMAP</strong> و <strong>POP3</strong> را به صورت دستی <strong>Disable</strong> کنید.</li>
+                                <li>یا با یک دستور پاورشل تمام درگاه‌های او را ببندید و سرویس استور را ری‌استارت کنید:</li>
+                            </ol>
+                            <div class="code-block text-xs sm:text-sm">
+                                Set-CASMailbox -Identity "ali" -OWAEnabled $false -ActiveSyncEnabled $false -MAPIEnabled $false -ImapEnabled $false -PopEnabled $false
+                            </div>
+                        </div>
+
+                        <!-- User Password Change & Admin Reset Password -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Self-Service Password Change -->
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-key text-accent"></i> تغییر رمز توسط خود کاربر در OWA
+                                </h3>
+                                <p class="text-sm text-gray-400 leading-relaxed text-justify mb-3">
+                                    یک کاربر عادی می‌تواند در وب‌میل خود (OWA) از مسیر <code class="mono-inline">Settings (چرخ‌دنده) > Options > General > My Account</code> روی گزینه <strong>Change your password</strong> کلیک کرده و رمز خود را عوض کند.
+                                </p>
+                                <div class="bg-amber-500/10 p-3.5 rounded-xl border border-amber-500/20 text-xs text-amber-200 leading-relaxed text-justify">
+                                    <strong class="text-amber-400 block mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> نکته بسیار مهم:</strong>
+                                    از آنجایی که اکسچنج دیتابیس هویتی مستقلی ندارد و به AD متصل است، وقتی کاربر رمز ایمیل خود را در OWA عوض می‌کند، <strong>رمز لاگین ویندوز (اکانت دامین) او نیز در همان لحظه تغییر می‌کند!</strong>
+                                </div>
+                            </div>
+
+                            <!-- Admin Reset Password RBAC -->
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-user-shield text-emerald-400"></i> فعال‌سازی گزینه Reset Password در ECP
+                                </h3>
+                                <p class="text-sm text-gray-400 leading-relaxed text-justify mb-3">
+                                    به صورت پیش‌فرض، حتی اگر عضو گروه <em>Organization Management</em> باشید، وقتی در ECP وارد Properties یک کاربر می‌شوید، گزینه‌ای برای ریست کردن پسورد او نمی‌بینید!
+                                </p>
+                                <div class="bg-[#050b14] p-3.5 rounded-xl border border-white/10 text-xs text-gray-300 space-y-1.5">
+                                    <strong class="text-emerald-400 block mb-1">مراحل فعال‌سازی:</strong>
+                                    <p>۱. در ECP به بخش <code class="mono-inline">Permissions > Admin Roles</code> بروید.</p>
+                                    <p>۲. گروه <code class="mono-inline">Organization Management</code> را ویرایش کنید.</p>
+                                    <p>۳. در بخش Roles روی <code class="mono-inline">+</code> بزنید و رول <strong>Reset Password</strong> را به آن اضافه کنید.</p>
+                                    <p>۴. یک بار از ECP خارج و دوباره لاگین کنید؛ اکنون گزینه ریست پسورد مستقیم در پروفایل کاربران ظاهر می‌شود!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Recipient Types (Linked, Mail User, Mail Contact) & PST Export -->
+            <section id="recipient-types" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-address-book text-accent"></i>
+                        کالبدشکافی انواع گیرندگان (Recipients) و خروجی PST
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- Linked Mailbox -->
+                        <div class="bg-blue-900/15 p-6 rounded-2xl border-l-4 border-blue-400">
+                            <h3 class="text-xl font-bold text-blue-400 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-link"></i> Linked Mailbox چیست و کجا کاربرد دارد؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify">
+                                همان‌طور که در اپیزود اول دیدیم، در طراحی‌های فوق‌امنیتی (<strong>Resource Forest Topology</strong>)، سرورهای اکسچنج را در یک Forest مجزا نصب می‌کنیم. در این حالت، اکانت اصلی که کاربر با آن به کامپیوترش لاگین می‌کند در <em>Forest A (Account Forest)</em> قرار دارد، اما میل‌باکس او در <em>Forest B (Exchange Forest)</em> ساخته می‌شود. 
+                                به این میل‌باکس <strong>Linked Mailbox</strong> می‌گویند؛ اکانت محلی آن در فارست اکسچنج <strong>Disabled</strong> است و از طریق یک <em>Forest Trust</em> به اکانت فعال کاربر در فارست اصلی لینک می‌شود.
+                            </p>
+                        </div>
+
+                        <!-- Mail User vs Mail Contact -->
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-2">تفاوت حیاتی Mail User و Mail Contact</h3>
+                            <p class="text-sm text-gray-400 mb-4 text-justify">
+                                هر دوی این آبجکت‌ها برای افرادی ساخته می‌شوند که <strong>میل‌باکس آن‌ها بیرون از سرور اکسچنج ماست</strong> (مثلاً ایمیلشان روی Gmail یا سرور شرکت همکار است)، اما می‌خواهیم نام آن‌ها در دفترچه تلفن سازمانی ما (GAL) دیده شود. تفاوتشان در چیست؟
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Mail Contact -->
+                                <div class="bg-black/40 p-6 rounded-2xl border border-white/5 relative">
+                                    <span class="px-2.5 py-1 rounded bg-orange-500/20 text-orange-400 text-xs font-bold float-left">بدون هویت دامین</span>
+                                    <h4 class="font-bold text-white mb-3 text-lg flex items-center gap-2">
+                                        <i class="fa-solid fa-address-card text-orange-400"></i> Mail Contact
+                                    </h4>
+                                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-300 space-y-2 leading-relaxed">
+                                        <li>صرفاً یک «مخاطب» در اکتیو دایرکتوری است (Contact Object).</li>
+                                        <li><strong>هیچ‌گونه یوزرنیم و پسوردی در دامین ما ندارد</strong> و نمی‌تواند به شبکه لاگین کند.</li>
+                                        <li>میل‌باکس در اکسچنج ما ندارد؛ فقط یک آدرس ایمیل خارجی (External Email Address) دارد تا همکاران راحت در Outlook پیدایش کنند.</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Mail User -->
+                                <div class="bg-black/40 p-6 rounded-2xl border border-white/5 relative">
+                                    <span class="px-2.5 py-1 rounded bg-accent/20 text-accent text-xs font-bold float-left">دارای اکانت AD</span>
+                                    <h4 class="font-bold text-white mb-3 text-lg flex items-center gap-2">
+                                        <i class="fa-solid fa-user-check text-accent"></i> Mail User (MEU)
+                                    </h4>
+                                    <ul class="list-disc list-inside text-xs sm:text-sm text-gray-300 space-y-2 leading-relaxed">
+                                        <li>یک <strong>User Account واقعی در Active Directory</strong> ما دارد (دارای SID، یوزرنیم و پسورد).</li>
+                                        <li>می‌تواند به کامپیوترهای دامین لاگین کند و از فایل‌سرورها استفاده کند (مثل پیمانکاران مقیم در شرکت).</li>
+                                        <li>اما روی سرور اکسچنج ما دیتابیس و میل‌باکس اشغال نمی‌کند و ایمیل‌هایش به آدرس خارجی او هدایت می‌شود.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Export to PST -->
+                        <div class="bg-[#050b14] p-6 rounded-2xl border border-accent/30">
+                            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-file-export text-accent"></i> خروجی گرفتن از میل‌باکس (Export to PST) و نحوه فعال‌سازی
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                فایل <strong>PST (Personal Storage Table)</strong> نسخه آرشیو آفلاین تمام ایمیل‌ها، تقویم و مخاطبین یک کاربر است. در اکسچنج، شما می‌توانید بدون نشستن پای سیستم کاربر، مستقیماً از روی سرور کل میل‌باکس او را به یک فایل <code class="mono-inline">.pst</code> تبدیل کنید. اما این گزینه به صورت پیش‌فرض برای هیچ ادمینی فعال نیست!
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-accent text-sm block mb-1">گام ۱: اعطای پرمیشن RBAC</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed">
+                                        در <code class="mono-inline">ECP > Permissions > Admin Roles</code>، رول <strong>Mailbox Import Export</strong> را به گروه <em>Organization Management</em> اضافه کنید (نیازمند لاگ‌آف و لاگین مجدد).
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-accent text-sm block mb-1">گام ۲: ساخت پوشه Share</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed">
+                                        اکسچنج فقط مسیر شبکه (UNC Path مثل <code class="mono-inline">\\SRV\PST</code>) را می‌پذیرد. روی این پوشه باید به گروه <strong>Exchange Trusted Subsystem</strong> دسترسی Read/Write بدهید!
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-accent text-sm block mb-1">گام ۳: اجرای اکسپورت</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed">
+                                        از طریق گزینه <code class="mono-inline">Export to a PST file</code> در منوی سه‌نقطه ECP و یا از طریق دستور پاورشل زیر اقدام کنید:
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="code-block text-xs sm:text-sm">
+                                New-MailboxExportRequest -Mailbox "ali" -FilePath "\\EX01\PSTShare\ali_backup.pst"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Mailbox Features, Retention Policy, Archiving -->
+            <section id="features-archive" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-box-archive text-accent"></i>
+                        Mailbox Features، سیاست‌های نگهداری و آرشیو ایمیل‌ها
+                    </h2>
+
+                    <div class="space-y-6">
+                        <!-- Mailbox Features Overview -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-accent"></i> بخش Mailbox Features چیست؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                در Properties هر کاربر در ECP، تب <strong>Mailbox Features</strong> مرکز کنترل قابلیت‌های ارتباطی و امنیتی آن میل‌باکس است. در این بخش می‌توانید پروتکل‌ها (POP3, IMAP, MAPI, OWA, ActiveSync) را روشن/خاموش کنید و سیاست‌های پیشرفته‌ای مثل <em>Retention Policy</em> و <em>Archiving</em> را فعال نمایید.
+                            </p>
+                        </div>
+
+                        <!-- Retention Policy & Archiving -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Retention Policy -->
+                            <div class="bg-purple-900/15 p-6 rounded-2xl border border-purple-500/30">
+                                <h3 class="text-lg font-bold text-purple-400 mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-calendar-check"></i> Retention Policy (سیاست نگهداری) چیست؟
+                                </h3>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                    بخشی از سیستم <strong>MRM (Messaging Records Management)</strong> در اکسچنج است. به ما اجازه می‌دهد چرخه عمر ایمیل‌ها را به صورت خودکار مدیریت کنیم.
+                                </p>
+                                <p class="text-xs sm:text-sm text-gray-400 leading-relaxed text-justify bg-black/40 p-4 rounded-xl border border-white/5">
+                                    <strong>مثال کاربردی:</strong> می‌توانیم تگ‌هایی (Retention Tags) تعریف کنیم که «هر ایمیلی که در پوشه <em>Deleted Items</em> بیش از ۳۰ روز ماند، خودکار برای همیشه پاک شود» یا «ایمیل‌های بالای ۲ سال به صورت اتوماتیک به میل‌باکس آرشیو منتقل شوند».
+                                </p>
+                            </div>
+
+                            <!-- In-Place Archive -->
+                            <div class="bg-emerald-900/15 p-6 rounded-2xl border border-emerald-500/30">
+                                <h3 class="text-lg font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-vault"></i> چه زمانی ایمیل‌های کاربر را Archive می‌کنیم؟
+                                </h3>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                    ویژگی <strong>In-Place Archive</strong> یک میل‌باکس دوم (کمکی) در کنار میل‌باکس اصلی برای کاربر می‌سازد که هم در Outlook و هم در OWA زیر پوشه‌های اصلی دیده می‌شود.
+                                </p>
+                                <ul class="list-disc list-inside text-xs sm:text-sm text-gray-300 space-y-2 leading-relaxed">
+                                    <li><strong>حجم بالای ایمیل‌ها:</strong> وقتی میل‌باکس اصلی کاربر پر شده و فایل کش اوت‌لوک (<code class="mono-inline">.ost</code>) سیستم او را کند کرده است (آرشیو در اوت‌لوک کش نمی‌شود و آنلاین خوانده می‌شود!).</li>
+                                    <li><strong>حذف فایل‌های PST پراکنده:</strong> جلوگیری از ذخیره فایل‌های PST روی هارد لوکال کاربران که ریسک سرقت و خرابی بالایی دارند.</li>
+                                    <li><strong>الزامات قانونی (Compliance):</strong> نگهداری ایمیل‌های قدیمی روی یک دیتابیس مجزا با هاردهای ارزان‌تر (SATA/HDD) و حفظ دیتابیس اصلی روی SSD.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SECTION 6: Mail Flow, Delivery, Delegation (Send As / Behalf), Recall, CC/BCC -->
+            <section id="mailflow-delegation" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-paper-plane text-accent"></i>
+                        تنظیمات Delivery، تفویض اختیار، Recall و CC/BCC
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- Delivery Options & Message Size -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="font-bold text-accent mb-3 text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-share-nodes"></i> Delivery Options (فورواردینگ و سقف گیرندگان)
+                                </h3>
+                                <div class="space-y-4 text-sm text-gray-300 leading-relaxed text-justify">
+                                    <div>
+                                        <strong class="text-white block">1. Forwarding Address:</strong>
+                                        هدایت خودکار ایمیل‌های دریافتی این کاربر به یک شخص دیگر (مثلاً وقتی کارمند در مرخصی است). اگر تیک گزینه <code class="mono-inline">Deliver message to both forwarding address and mailbox</code> را بزنید، یک نسخه در میل‌باکس خودش می‌ماند و یک کپی فوروارد می‌شود؛ وگرنه فقط فوروارد می‌شود.
+                                    </div>
+                                    <div>
+                                        <strong class="text-white block">2. Maximum Recipients:</strong>
+                                        تعیین حداکثر تعداد افرادی که این کاربر می‌تواند در یک ایمیل واحد (مجموع To, CC, BCC) قرار دهد (جهت جلوگیری از ارسال اسپم داخلی توسط یک اکانت).
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="font-bold text-orange-400 mb-3 text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-weight-hanging"></i> محدودیت حجم ایمیل (Max Send/Receive Size)
+                                </h3>
+                                <p class="text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                    در بخش <code class="mono-inline">Mail Flow Settings > Message Size Restrictions</code> هر کاربر، می‌توانیم به صورت اختصاصی تعیین کنیم این شخص حداکثر چه حجمی از ایمیل (به همراه فایل پیوست) را می‌تواند <strong>ارسال (Sent)</strong> یا <strong>دریافت (Received)</strong> کند.
+                                </p>
+                                <p class="text-xs text-gray-400 bg-white/5 p-3 rounded-lg border border-white/10">
+                                    مثلاً در سطح سازمان محدودیت ارسال ۱۰ مگابایت است، اما برای مدیرعامل استثنا قائل شده و سقف Send Size او را روی ۵۰ مگابایت تنظیم می‌کنیم.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Send As vs Send On Behalf -->
+                        <div class="bg-[#050b14] p-6 rounded-2xl border border-accent/25">
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-user-secret text-accent"></i> تفویض اختیار (Mailbox Delegation): تفاوت Send As و Send On Behalf
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-accent/10 p-5 rounded-xl border border-accent/30">
+                                    <h4 class="font-bold text-accent text-base mb-2">Send As (ارسال دقیقاً به جای شخص)</h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                        اگر «کاربر A» دسترسی <strong>Send As</strong> روی میل‌باکس «مدیر B» داشته باشد و ایمیلی از طرف او بفرستد، گیرنده‌ی ایمیل در فیلد From <strong>فقط و فقط نام «مدیر B»</strong> را می‌بیند! هیچکس متوجه نمی‌شود که در واقع کاربر A پشت سیستم نشسته و این ایمیل را تایپ و ارسال کرده است.
+                                    </p>
+                                </div>
+                                <div class="bg-purple-500/10 p-5 rounded-xl border border-purple-500/30">
+                                    <h4 class="font-bold text-purple-400 text-base mb-2">Send On Behalf (ارسال از طرفِ شخص)</h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                        معمولاً برای مسئولین دفتر استفاده می‌شود. اگر «منشی A» دسترسی <strong>Send On Behalf</strong> روی «مدیر B» داشته باشد، گیرنده‌ی ایمیل به طور شفاف در هدر ایمیل می‌بیند: <br>
+                                        <code class="mono-inline mt-2">From: Secretary A on behalf of Manager B</code> <br>
+                                        (ارسال شده توسط منشی A از طرفِ مدیر B).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Recall & CC/BCC -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Recall -->
+                            <div class="bg-emerald-950/30 p-6 rounded-2xl border border-emerald-500/30">
+                                <h3 class="text-lg font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-rotate-left"></i> قابلیت Recall (پس گرفتن ایمیل ارسال‌شده)
+                                </h3>
+                                <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                    <strong>Recall</strong> قابلیتی در اوت‌لوک و اکسچنج است که به فرستنده اجازه می‌دهد ایمیلی که به اشتباه فرستاده را قبل از دیده شدن، از Inbox گیرنده حذف یا جایگزین کند (<code class="mono-inline">Sent Items > Double Click Mail > File > Info > Message Resend and Recall</code>).
+                                </p>
+                                <div class="bg-black/50 p-3.5 rounded-xl border border-white/5 text-xs text-gray-400 space-y-1.5">
+                                    <strong class="text-white block">شروط کارکرد و فعال بودن Recall:</strong>
+                                    <p>۱. <strong>فقط داخل سازمان (Internal)</strong> کار می‌کند! ایمیل ارسال‌شده به Gmail را هرگز نمی‌توان Recall کرد.</p>
+                                    <p>۲. گیرنده هنوز نباید ایمیل را باز کرده باشد (وضعیت ایمیل باید <strong>Unread</strong> باشد).</p>
+                                    <p>۳. در تنظیمات کلاینت/اکسچنج (<code class="mono-inline">Set-CalendarProcessing / Tracking</code> و تنظیمات Outlook گیرنده در بخش <code class="mono-inline">Options > Mail > Tracking > Process requests and responses on arrival</code>) پردازش خودکار فعال باشد.</p>
+                                </div>
+                            </div>
+
+                            <!-- CC vs BCC -->
+                            <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                                <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-eye-slash text-accent"></i> تفاوت CC و BCC در ارسال ایمیل
+                                </h3>
+                                <div class="space-y-4">
+                                    <div class="bg-white/5 p-3.5 rounded-xl border border-white/10">
+                                        <strong class="text-accent text-sm block mb-1">CC (Carbon Copy - رونوشت آشکار):</strong>
+                                        <p class="text-xs text-gray-300 leading-relaxed text-justify">
+                                            برای افرادی است که باید در جریان موضوع ایمیل قرار بگیرند اما مخاطب مستقیم (To) نیستند. <strong>تمام گیرندگان ایمیل می‌توانند ببینند چه کسانی در لیست CC قرار دارند.</strong>
+                                        </p>
+                                    </div>
+                                    <div class="bg-white/5 p-3.5 rounded-xl border border-white/10">
+                                        <strong class="text-amber-400 text-sm block mb-1">BCC (Blind Carbon Copy - رونوشت مخفی):</strong>
+                                        <p class="text-xs text-gray-300 leading-relaxed text-justify">
+                                            سرور اکسچنج هنگام تحویل ایمیل، هدر <strong>BCC</strong> را برای سایرین حذف می‌کند! بنابراین افراد موجود در <code class="mono-inline">To</code> و <code class="mono-inline">CC</code> (و حتی سایر افراد داخل <code class="mono-inline">BCC</code>) <strong>مطلقاً متوجه نمی‌شوند</strong> که یک نسخه از این ایمیل برای شخصِ داخل BCC هم ارسال شده است.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.section-content');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = item.getAttribute('data-target');
+
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+
+                    sections.forEach(section => {
+                        section.classList.remove('active', 'fade-in');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                            // Trigger reflow to restart animation
+                            void section.offsetWidth; 
+                            section.classList.add('fade-in');
+                        }
+                    });
+
+                    // Close mobile sidebar after click
+                    if(window.innerWidth < 1024) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
+
+            function openMobileSidebar() {
+                sidebar.classList.remove('translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.add('translate-x-full');
+                sidebarOverlay.classList.remove('opacity-100');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+
+            mobileMenuBtn.addEventListener('click', openMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+        });
+    </script>
+</body>
+</html>
