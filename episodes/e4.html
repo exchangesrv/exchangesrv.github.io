@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Server | اپیزود ۴</title>
+    
+    <!-- Vazirmatn Font (Strictly Enforced) -->
+    <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Courier New", 'monospace']
+                    },
+                    colors: {
+                        accent: '#00e5ff',
+                        accentHover: '#33edff',
+                        darkBg: '#050b14',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Dark Theme & Background Pattern */
+        body {
+            font-family: 'Vazirmatn', sans-serif !important;
+            background-color: #050b14;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(0, 229, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(0, 229, 255, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-sidebar {
+            background: rgba(5, 10, 20, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0, 229, 255, 0.2);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Sections Toggle */
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #050b14; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+
+        /* Monospace / Code Blocks */
+        .mono-inline {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0, 0, 0, 0.6);
+            color: #67e8f9;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+        
+        .code-block {
+            font-family: 'Courier New', Courier, monospace;
+            background: #000;
+            color: #a5b4fc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* Sidebar active item styling */
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, transparent 100%);
+            border-right: 3px solid #00e5ff;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex selection:bg-accent selection:text-darkBg">
+
+    <!-- Mobile Header & Menu Toggle -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 h-16 glass-panel z-50 flex items-center justify-between px-6 border-b border-accent/20">
+        <div class="text-accent font-bold text-lg"><i class="fa-brands fa-microsoft me-2"></i>Exchange Server</div>
+        <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar (Right) -->
+    <aside id="sidebar" class="glass-sidebar w-72 fixed h-full right-0 top-0 z-40 transform translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col pt-16 lg:pt-0 shrink-0">
+        <div class="p-6 border-b border-white/5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center border border-accent/40 shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                <i class="fa-solid fa-boxes-stacked text-accent text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-bold text-lg leading-tight">مستندات معماری</h1>
+                <p class="text-accent/80 text-sm mt-1">اپیزود ۴ : گروه‌ها، منابع و کلاینت</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-2 custom-scrollbar">
+            <p class="px-4 text-xs font-semibold text-gray-500 mb-2 mt-2 tracking-wider">سرفصل‌های اپیزود</p>
+            
+            <a href="#" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="uninstall-migration">
+                <i class="fa-solid fa-truck-ramp-box w-5 text-center"></i>
+                <span class="text-sm font-medium">حذف اکسچنج، اثرات AD و مهاجرت</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="delegation-profiles">
+                <i class="fa-solid fa-user-pen w-5 text-center"></i>
+                <span class="text-sm font-medium">اعمال Delegation، پروفایل و OST</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="shared-resource">
+                <i class="fa-solid fa-building-user w-5 text-center"></i>
+                <span class="text-sm font-medium">Shared و Resource Mailbox</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="groups-publicfolder">
+                <i class="fa-solid fa-users-rectangle w-5 text-center"></i>
+                <span class="text-sm font-medium">انواع گروه‌ها و Public Folder</span>
+            </a>
+
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="outlook-mail-actions">
+                <i class="fa-solid fa-signature w-5 text-center"></i>
+                <span class="text-sm font-medium">سیگنیچر، Reply و Direct Replies</span>
+            </a>
+            
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all" data-target="calendar-sharing">
+                <i class="fa-solid fa-calendar-Plus w-5 text-center"></i>
+                <span class="text-sm font-medium">اشتراک‌گذاری تقویم و پروتکل‌ها</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 lg:mr-72 min-h-screen pt-24 lg:pt-10 px-4 sm:px-8 lg:px-12 pb-16">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- SECTION 1: Uninstall Exchange, AD Footprints & Migration Methods -->
+            <section id="uninstall-migration" class="section-content active fade-in">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-accent/20 rounded-full blur-[60px] pointer-events-none"></div>
+                    
+                    <div class="inline-block px-3 py-1 rounded-md bg-accent/10 border border-accent/20 text-accent text-xs font-bold mb-5 tracking-wider">
+                        DECOMMISSIONING & MIGRATION
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-truck-ramp-box text-accent"></i>
+                        حذف اصولی اکسچنج، اثرات باقی‌مانده و استراتژی‌های Migration
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <!-- Uninstalling Exchange & AD Footprints -->
+                        <div class="bg-red-500/10 p-6 rounded-2xl border-r-4 border-red-500">
+                            <h3 class="font-bold text-red-400 mb-3 text-lg flex items-center gap-2">
+                                <i class="fa-solid fa-trash-arrow-up"></i> نحوه صحیح حذف (Uninstall) اکسچنج و اثرات باقی‌مانده در AD
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-4">
+                                <strong>قانون طلایی:</strong> هرگز و تحت هیچ شرایطی یک سرور اکسچنج را مستقیماً خاموش، فرمت یا از روی Hyper-V/VMware پاک (Delete VM) نکنید! چون تنظیمات اکسچنج در دل پارتیشن Configuration اکتیو دایرکتوری ثبت شده است، حذف فیزیکی سرور باعث ایجاد آبجکت‌های یتیم (Orphaned Objects) و خطاهای شدید در کل دامین می‌شود.
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="bg-black/50 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-white text-sm block mb-2"><i class="fa-solid fa-list-check text-accent me-1"></i> مراحل حذف استاندارد (Graceful Uninstall):</strong>
+                                    <ol class="list-decimal list-inside text-xs text-gray-400 space-y-1.5 leading-relaxed">
+                                        <li>حذف یا انتقال تمام میل‌باکس‌های کاربران (User Mailboxes) و آرشیوها.</li>
+                                        <li>حذف یا انتقال میل‌باکس‌های سیستمی مخفی (<strong>Arbitration Mailboxes</strong>).</li>
+                                        <li>پاک کردن Send Connectors و دیتابیس‌های اضافی.</li>
+                                        <li>اجرای Uninstaller از طریق Control Panel یا دستور زیر در CMD:</li>
+                                    </ol>
+                                    <div class="code-block text-xs mt-2">
+                                        Setup.exe /mode:Uninstall /IAcceptExchangeServerLicenseTerms_DiagnosticDataON
+                                    </div>
+                                </div>
+
+                                <div class="bg-black/50 p-4 rounded-xl border border-red-500/20">
+                                    <strong class="text-red-300 text-sm block mb-2"><i class="fa-solid fa-fingerprint me-1"></i> آیا پس از حذف، اثرات اکسچنج باقی می‌ماند؟</strong>
+                                    <p class="text-xs text-gray-300 leading-relaxed text-justify mb-2">
+                                        <strong class="text-amber-400">بله! ۱۰۰٪ باقی می‌ماند:</strong>
+                                    </p>
+                                    <ul class="list-disc list-inside text-xs text-gray-400 space-y-1.5 leading-relaxed text-justify">
+                                        <li><strong>تغییرات Schema دائمی هستند:</strong> کلاس‌ها و اتریبیوت‌هایی که هنگام نصب اکسچنج (<code class="mono-inline">/PrepareSchema</code>) به اکتیو دایرکتوری اضافه شده‌اند، <strong>تا ابد در Forest باقی می‌مانند</strong>؛ زیرا در معماری مایکروسافت، Schema قابل Rollback یا حذف نیست.</li>
+                                        <li><strong>حذف اجباری با ADSI Edit:</strong> اگر سرور اکسچنج بسوزد و امکان Uninstall نباشد، تنها راه پاک کردن ردپای کانتینر Organization، ورود به کنسول خطرناک <code class="mono-inline">adsiedit.msc</code> و پاک کردن دستی نود <code class="mono-inline">CN=Microsoft Exchange</code> از مسیر <code class="mono-inline">Configuration > Services</code> است.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Two Migration Approaches -->
+                        <div class="bg-[#050b14]/80 p-6 rounded-2xl border border-white/10">
+                            <h3 class="font-bold text-white mb-4 text-lg border-b border-white/10 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-route text-accent"></i> دو راهکار اصلی برای مهاجرت ایمیل‌ها (Email Migration)
+                            </h3>
+                            <p class="text-sm text-gray-400 mb-5 text-justify leading-relaxed">
+                                زمانی که می‌خواهیم ایمیل‌های کاربران را از یک سرور قدیمی (یا ایمیل‌سرورهای غیرمایکروسافتی مثل MDaemon، Kerio یا لینوکس) و یا بین دو فارست مجزا به سرور اکسچنج جدید منتقل کنیم، دو رویکرد کاربردی پیش رو داریم:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- CodeTwo -->
+                                <div class="bg-accent/10 p-5 rounded-2xl border border-accent/30 relative">
+                                    <span class="px-2.5 py-1 rounded bg-accent/20 text-accent text-xs font-bold float-left">Enterprise & Automated</span>
+                                    <h4 class="font-bold text-white text-base mb-3 flex items-center gap-2">
+                                        <i class="fa-solid fa-gears text-accent"></i> روش اول: ابزارهای Third-Party (مثل CodeTwo)
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                        نرم‌افزار <strong>CodeTwo Exchange Migration</strong> یکی از بهترین ابزارهای تجاری دنیاست که مستقیماً در لایه سرور به سرور (از طریق پروتکل‌های EWS، MAPI یا IMAP) به سرور مبدا و مقصد متصل می‌شود.
+                                    </p>
+                                    <ul class="list-disc list-inside text-xs text-gray-400 space-y-1.5 leading-relaxed">
+                                        <li>بدون نیاز به دخالت کاربر یا نشستن پای سیستم کلاینت‌ها.</li>
+                                        <li>انتقال کامل ایمیل‌ها، پوشه‌ها، تقویم (Calendar)، مخاطبین و Tasks.</li>
+                                        <li>امکان <strong>Delta Sync</strong> (انتقال تدریجی در پس‌زمینه و سینک تغییرات نهایی در روز سوئیچ).</li>
+                                    </ul>
+                                </div>
+
+                                <!-- POP3/IMAP via Outlook Bridge -->
+                                <div class="bg-purple-900/15 p-5 rounded-2xl border border-purple-500/30 relative">
+                                    <span class="px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 text-xs font-bold float-left">Client-Side Bridge</span>
+                                    <h4 class="font-bold text-white text-base mb-3 flex items-center gap-2">
+                                        <i class="fa-solid fa-laptop-file text-purple-400"></i> روش دوم: استفاده از POP3/IMAP و واسط Outlook
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                        در سازمان‌های کوچک‌تر یا زمانی که دسترسی ادمین به ساختار سرور مبدا نداریم، از <strong>نرم‌افزار Outlook به عنوان پل انتقال</strong> استفاده می‌کنیم:
+                                    </p>
+                                    <ol class="list-decimal list-inside text-xs text-gray-400 space-y-1.5 leading-relaxed">
+                                        <li>ابتدا اکانت قدیمی را با پروتکل <strong>POP3 یا IMAP</strong> در Outlook ست می‌کنیم تا تمام ایمیل‌ها از سرور قدیم دانلود شده و در فایل دیتای لوکال (PST/OST) داخل Outlook بنشیند.</li>
+                                        <li>سپس اکانت جدید <strong>Exchange</strong> را به همان Outlook اضافه می‌کنیم.</li>
+                                        <li>پوشه‌ها یا فایل PST را به داخل میل‌باکس اکسچنج Drag & Drop (یا Import) می‌کنیم تا اوت‌لوک تمام ایمیل‌ها را به صورت معکوس به داخل دیتابیس سرور اکسچنج جدید آپلود (Sync) کند!</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Delegation Implementation, Outlook Profiles & OST to PST -->
+            <section id="delegation-profiles" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-user-pen text-accent"></i>
+                        نحوه اعمال Delegation، مفهوم Profile در اوت‌لوک و تبدیل OST به PST
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- How to apply Send As / Send on Behalf -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-white/10 pb-3">
+                                <i class="fa-solid fa-sliders text-accent"></i> نحوه اعمال عملی Send As و Send On Behalf (سمت سرور و کلاینت)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-accent text-sm block mb-2">۱. تنظیم سمت سرور (توسط ادمین در ECP):</strong>
+                                    <p class="text-xs text-gray-300 leading-relaxed text-justify mb-2">
+                                        وارد <code class="mono-inline">ECP > Recipients > Mailboxes</code> شوید. روی میل‌باکس <strong>مدیر (شخصی که قرار است از طرفش ایمیل ارسال شود)</strong> دابل‌کلیک کنید و به تب <strong>Mailbox Delegation</strong> بروید:
+                                    </p>
+                                    <ul class="list-disc list-inside text-xs text-gray-400 space-y-1">
+                                        <li>در کادر <strong>Send As</strong> یا <strong>Send on Behalf</strong> روی علامت <code class="mono-inline">+</code> بزنید و اکانت «منشی/کارشناس» را اضافه کنید.</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-emerald-400 text-sm block mb-2">۲. نحوه ارسال در Outlook (توسط منشی):</strong>
+                                    <p class="text-xs text-gray-300 leading-relaxed text-justify mb-2">
+                                        صرفِ دادن دسترسی باعث نمی‌شود ایمیل‌ها خودکار از طرف مدیر بروند! کارشناس باید در Outlook مراحل زیر را انجام دهد:
+                                    </p>
+                                    <ol class="list-decimal list-inside text-xs text-gray-400 space-y-1">
+                                        <li>روی <strong>New Email</strong> کلیک کند.</li>
+                                        <li>به سربرگ <strong>Options</strong> در بالای پنجره ایمیل برود و گزینه <strong>From</strong> را روشن کند.</li>
+                                        <li>روی دکمه <code class="mono-inline">From ▼</code> کلیک کرده، گزینه <code class="mono-inline">Other E-mail Address...</code> را بزند و ایمیل مدیر را انتخاب کند.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400 block mb-1">معادل دستورات در PowerShell (EMS):</span>
+                            <div class="code-block text-xs sm:text-sm">
+                                # Grant Send on Behalf:<br>
+                                Set-Mailbox -Identity "CEO" -GrantSendOnBehalfTo "Secretary"<br><br>
+                                # Grant Send As (AD Permission):<br>
+                                Add-ADPermission -Identity "CEO" -User "DOMAIN\Secretary" -ExtendedRights "Send As"
+                            </div>
+                        </div>
+
+                        <!-- Outlook Profiles -->
+                        <div class="bg-purple-900/15 p-6 rounded-2xl border-r-4 border-purple-400">
+                            <h3 class="text-lg font-bold text-purple-300 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-id-badge"></i> مفهوم Profile در نرم‌افزار Outlook چیست؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-3">
+                                بسیاری از کاربران تصور می‌کنند Outlook فقط یک محیط ثابت دارد؛ در حالی که اوت‌لوک بر پایه مفهوم <strong>Profile</strong> کار می‌کند. پروفایل یک «ظرف تنظیمات مجزا» در رجیستری ویندوز است که شامل لیست اکانت‌های ایمیل، مسیر فایل‌های دیتابیس محلی (<code class="mono-inline">.ost</code> و <code class="mono-inline">.pst</code>)، امضاها و ظاهر اوت‌لوک است.
+                            </p>
+                            <div class="bg-black/40 p-4 rounded-xl border border-white/5 text-xs sm:text-sm text-gray-400 leading-relaxed">
+                                <strong class="text-white block mb-1">مسیر مدیریت پروفایل‌ها و کاربرد آن:</strong>
+                                از طریق <code class="mono-inline">Control Panel > Mail (Microsoft Outlook) > Show Profiles</code> می‌توانید پروفایل‌های متعددی بسازید و گزینه <em>Prompt for a profile to be used</em> را فعال کنید. <br>
+                                <strong>کاربرد فنی:</strong> ۱) وقتی اوت‌لوکِ کاربری کرش می‌کند یا سینک نمی‌شود، بدون دست زدن به سرور، یک پروفایل جدید برایش می‌سازیم تا فایل OST از نو ساخته شود. ۲) تفکیک کامل محیط کاری دو ایمیل مختلف روی یک کامپیوتر بدون قاطی شدن پوشه‌ها.
+                            </div>
+                        </div>
+
+                        <!-- Local OST Path -> Convert to PST -> Import -->
+                        <div class="bg-black/60 p-6 rounded-2xl border border-accent/30">
+                            <h3 class="text-lg font-bold text-accent mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-hard-drive"></i> استخراج دیتای لوکال Outlook (فایل OST)، تبدیل به PST و ایمپورت مجدد
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                وقتی اوت‌لوک در حالت <strong>Cached Exchange Mode</strong> به سرور اکسچنج وصل می‌شود، یک کپی کامل از تمام ایمیل‌ها، تقویم و مخاطبین را در یک فایل آفلاین با پسوند <code class="mono-inline">.ost</code> (Offline Storage Table) روی درایو C کامپیوتر کاربر ذخیره می‌کند.
+                            </p>
+                            <div class="bg-[#050b14] p-4 rounded-xl border border-white/10 mb-4">
+                                <span class="text-xs text-gray-400 block mb-1">مسیر پیش‌فرض ذخیره شدن فایل‌های OST در ویندوز:</span>
+                                <div class="code-block text-xs sm:text-sm text-accent">
+                                    C:\Users\&lt;Username&gt;\AppData\Local\Microsoft\Outlook<br>
+                                    # Shortcut Run Command:<br>
+                                    %localappdata%\Microsoft\Outlook
+                                </div>
+                            </div>
+                            <div class="bg-amber-500/10 p-4 rounded-xl border border-amber-500/20 text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                <strong class="text-amber-400 block mb-1"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> سناریوی نجات دیتا (OST به PST):</strong>
+                                فایل <code class="mono-inline">.ost</code> به صورت مستقیم قابل Import شدن در یک اوت‌لوک دیگر یا سرور جدید نیست (چون به SID و پروفایل قبلی قفل شده است). اگر سرور اکسچنج شرکت به کل نابود شود و بکاپ هم نداشته باشید، می‌توانید به مسیر بالا در کامپیوتر تک‌تک کاربران بروید، فایل <code class="mono-inline">.ost</code> آن‌ها را بردارید، با ابزارهای مبدل (<strong>OST to PST Converter</strong> و یا خروجی گرفتن از داخل اوت‌لوک در حالت Offline) آن را به فایل استاندارد <code class="mono-inline">.pst</code> تبدیل کنید و سپس در سرور اکسچنج جدید ایمپورت نمایید!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Shared Mailbox vs User Mailbox & Resource Mailboxes -->
+            <section id="shared-resource" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-building-user text-accent"></i>
+                        کالبدشکافی Shared Mailbox و Resource Mailbox
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- Shared Mailbox Deep Dive -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-1.5 h-full bg-accent"></div>
+                            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-envelopes-bulk text-accent"></i> Shared Mailbox (میل‌باکس اشتراکی) چیست؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-4">
+                                <strong>Shared Mailbox</strong> نوع خاصی از میل‌باکس در اکسچنج است که برای آدرس‌های عمومی و دپارتمانی شرکت (مانند <code class="mono-inline">info@</code>، <code class="mono-inline">support@</code>، <code class="mono-inline">sales@</code> یا <code class="mono-inline">hr@</code>) ساخته می‌شود تا چندین کارمند به صورت همزمان بتوانند ایمیل‌های ورودی آن را بخوانند و از طرف آن پاسخ دهند.
+                            </p>
+
+                            <!-- The Golden Interview Question -->
+                            <div class="bg-accent/10 p-5 rounded-2xl border border-accent/30">
+                                <h4 class="font-bold text-accent text-base mb-3 flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-question"></i> سوال طلایی مصاحبه: چرا به جای Shared Mailbox، یک یوزر عادی نسازیم و به بقیه Full Control (Full Access) بدهیم؟
+                                </h4>
+                                <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify mb-3">
+                                    در نگاه اول هر دو یک کار را انجام می‌دهند، اما ۳ تفاوت معماری و امنیتی بسیار مهم بین آن‌ها وجود دارد:
+                                </p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="bg-[#050b14] p-4 rounded-xl border border-white/10">
+                                        <strong class="text-emerald-400 text-xs sm:text-sm block mb-1">۱. امنیت (اکانت AD غیرفعال و بدون رمز)</strong>
+                                        <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                            وقتی Shared Mailbox می‌سازید، اکانت متناظر آن در Active Directory <strong>به صورت پیش‌فرض Disabled است و هیچ پسوردی ندارد!</strong> هیچکس نمی‌تواند مستقیماً با یوزرنیم <code class="mono-inline">info</code> لاگین کند؛ افراد باید با اکانت شخصی خودشان وارد شوند و این یعنی در لاگ‌های امنیتی (Audit Log) دقیقاً مشخص است کدام کارمند ایمیل را پاک یا ارسال کرده است!
+                                        </p>
+                                    </div>
+                                    <div class="bg-[#050b14] p-4 rounded-xl border border-white/10">
+                                        <strong class="text-blue-400 text-xs sm:text-sm block mb-1">۲. عدم نیاز به لایسنس مجزا</strong>
+                                        <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                            از نظر قوانین لایسنسینگ مایکروسافت (و در محیط‌های ابری/هیبرید تا حجم ۵۰ گیگابایت)، Shared Mailbox <strong>رایگان است و نیازی به خرید لایسنس (CAL / Subscription) جداگانه ندارد</strong>، چون کاربرانی که به آن وصل می‌شوند خودشان لایسنس دارند.
+                                        </p>
+                                    </div>
+                                    <div class="bg-[#050b14] p-4 rounded-xl border border-white/10">
+                                        <strong class="text-purple-400 text-xs sm:text-sm block mb-1">۳. تفکیک منطقی و Auto-Mapping</strong>
+                                        <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                            در پنل مدیریت اکسچنج در تب مجزایی (<code class="mono-inline">Recipients > Shared</code>) دسته‌بندی می‌شود تا با پرسنل واقعی شرکت قاطی نشود و به محض دادن دسترسی، با ویژگی <strong>Auto-Mapping</strong> خودکار زیر اوت‌لوکِ اعضای تیم ظاهر می‌شود.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resource Mailboxes (Room & Equipment) -->
+                        <div class="bg-[#050b14]/80 p-6 rounded-2xl border border-white/10">
+                            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-door-open text-emerald-400"></i> Resource Mailbox (میل‌باکس منابع) چیست و چه انواعی دارد؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                میل‌باکس‌هایی هستند که به جای انسان، به <strong>اموال، اتاق‌ها و تجهیزات فیزیکی شرکت</strong> اختصاص داده می‌شوند تا پرسنل بتوانند از طریق تقویم اوت‌لوک (Meeting Request) آن‌ها را بدون تداخل زمانی رزرو کنند. (اکانت AD این میل‌باکس‌ها نیز مثل Shared Mailbox به صورت پیش‌فرض <strong>Disabled</strong> است).
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                <!-- Room Mailbox -->
+                                <div class="bg-emerald-900/10 p-5 rounded-xl border border-emerald-500/30">
+                                    <h4 class="font-bold text-emerald-400 text-base mb-2 flex items-center gap-2">
+                                        <i class="fa-solid fa-people-roof"></i> ۱. Room Mailbox (میل‌باکس اتاق)
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                        مخصوص <strong>مکان‌های فیزیکی ثابت</strong> است؛ مانند «اتاق کنفرانس طبقه ۳»، «سالن آمفی‌تئاتر» یا «اتاق آموزش». می‌توانید برای آن ظرفیت (Capacity) مشخص کنید تا مثلاً برای جلسات ۵۰ نفره، اتاق ۱۰ نفره رزرو نشود.
+                                    </p>
+                                </div>
+
+                                <!-- Equipment Mailbox -->
+                                <div class="bg-amber-900/10 p-5 rounded-xl border border-amber-500/30">
+                                    <h4 class="font-bold text-amber-400 text-base mb-2 flex items-center gap-2">
+                                        <i class="fa-solid fa-video"></i> ۲. Equipment Mailbox (میل‌باکس تجهیزات)
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                        مخصوص <strong>تجهیزات قابل حمل و غیرمکانی</strong> است؛ مانند «ویدئو پروژکتور پرتابل»، «لپ‌تاپ ارائه»، «دوربین عکاسی شرکت» یا حتی «خودروی سازمانی».
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/5 p-4 rounded-xl border border-white/10 text-xs text-gray-400 leading-relaxed">
+                                <strong class="text-white block mb-1"><i class="fa-solid fa-robot text-accent me-1"></i> مکانیزم رزرو (Booking Options):</strong>
+                                ریسورس میل‌باکس‌ها دارای موتوری به نام <em>Resource Booking Attendant</em> هستند که می‌تواند روی دو حالت تنظیم شود: ۱) <strong>AutoAccept:</strong> اگر در آن ساعت خالی باشد، خودکار درخواست جلسه را قبول (Accept) و اگر پر باشد رد (Decline) می‌کند. ۲) <strong>Delegate:</strong> درخواست رزرو برای یک شخص (مثلاً مسئول دفتر یا مدیر داخلی) ارسال می‌شود تا او دستی تایید یا رد کند.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Exchange Groups & Public Folders -->
+            <section id="groups-publicfolder" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-users-rectangle text-accent"></i>
+                        انواع گروه‌ها در اکسچنج و مفهوم Public Folder
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- 3 Types of Groups in Exchange -->
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-2">تفاوت ۳ نوع گروه در اکسچنج سرور (Recipients > Groups)</h3>
+                            <p class="text-sm text-gray-400 mb-5 text-justify">
+                                وقتی در اکسچنج یک گروه می‌سازید تا با ارسال یک ایمیل به آدرس گروه، تمام اعضای آن ایمیل را دریافت کنند، حتماً باید گروه از نوع <strong>Universal</strong> در اکتیو دایرکتوری باشد. اکسچنج ۳ مدل گروه در اختیار ما قرار می‌دهد:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                <!-- Distribution Group -->
+                                <div class="bg-black/40 p-5 rounded-2xl border border-white/10 flex flex-col justify-between">
+                                    <div>
+                                        <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[11px] font-bold inline-block mb-2">بدون SID امنیتی</span>
+                                        <h4 class="font-bold text-white text-base mb-2 flex items-center gap-2">
+                                            <i class="fa-solid fa-users text-blue-400"></i> 1. Distribution Group
+                                        </h4>
+                                        <p class="text-xs text-gray-300 leading-relaxed text-justify mb-3">
+                                            صرفاً یک لیست توزیع ایمیل است (مثلاً <code class="mono-inline">finance@company.com</code>).
+                                        </p>
+                                    </div>
+                                    <div class="bg-blue-950/30 p-3 rounded-xl border border-blue-500/20 text-xs text-gray-400">
+                                        <strong>ویژگی کلیدی:</strong> این گروه فاقد <strong>SID (Security Identifier)</strong> است؛ یعنی نمی‌توانید به این گروه روی پوشه‌های فایل‌سرور (NTFS) یا تقویم‌ها پرمیشن بدهید!
+                                    </div>
+                                </div>
+
+                                <!-- Security Group -->
+                                <div class="bg-black/40 p-5 rounded-2xl border border-accent/30 flex flex-col justify-between">
+                                    <div>
+                                        <span class="px-2 py-0.5 rounded bg-accent/20 text-accent text-[11px] font-bold inline-block mb-2">دارای SID + ایمیل</span>
+                                        <h4 class="font-bold text-white text-base mb-2 flex items-center gap-2">
+                                            <i class="fa-solid fa-user-shield text-accent"></i> 2. Mail-Enabled Security Group
+                                        </h4>
+                                        <p class="text-xs text-gray-300 leading-relaxed text-justify mb-3">
+                                            یک گروه امنیتی (Security Group) در AD است که صاحب آدرس ایمیل هم شده است (دو منظوره).
+                                        </p>
+                                    </div>
+                                    <div class="bg-accent/10 p-3 rounded-xl border border-accent/20 text-xs text-gray-300">
+                                        <strong>تفاوت با Distribution:</strong> چون دارای <strong>SID</strong> است، هم می‌توانید به آن ایمیل بفرستید و هم می‌توانید به این گروه روی فولدرهای Share، شیرپوینت و Public Folderها <strong>پرمیشن و سطح دسترسی</strong> بدهید!
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Distribution Group -->
+                                <div class="bg-black/40 p-5 rounded-2xl border border-purple-500/30 flex flex-col justify-between">
+                                    <div>
+                                        <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[11px] font-bold inline-block mb-2">عضویت خودکار (Query-Based)</span>
+                                        <h4 class="font-bold text-white text-base mb-2 flex items-center gap-2">
+                                            <i class="fa-solid fa-bolt text-purple-400"></i> 3. Dynamic Distribution Group
+                                        </h4>
+                                        <p class="text-xs text-gray-300 leading-relaxed text-justify mb-3">
+                                            این گروه <strong>هیچ لیست اعضای ثابتی ندارد!</strong> بلکه بر اساس یک <strong>شرط و فیلتر (LDAP Query)</strong> کار می‌کند.
+                                        </p>
+                                    </div>
+                                    <div class="bg-purple-950/30 p-3 rounded-xl border border-purple-500/20 text-xs text-gray-400">
+                                        <strong>نحوه کارکرد:</strong> مثلاً شرط می‌گذارید «هر کسی که در OU مالی است یا فیلد Department او Sales است». هر بار که ایمیلی به این گروه فرستاده می‌شود، اکسچنج در همان لحظه AD را کوئری گرفته و اعضا را پویا پیدا می‌کند!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Public Folders -->
+                        <div class="bg-gradient-to-l from-amber-500/15 to-transparent p-6 rounded-2xl border-r-4 border-amber-400">
+                            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-folder-tree text-amber-400"></i> Public Folder (پوشه‌های عمومی سازمانی) چیست؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-4">
+                                <strong>Public Folder</strong> قابلیتی در اکسچنج برای جمع‌آوری، سازماندهی و به اشتراک‌گذاری اطلاعات (ایمیل‌ها، اسناد، فرم‌ها و مخاطبین) به صورت یک <strong>ساختار درختی و سلسله‌مراتبی عمیق</strong> در سطح کل سازمان است (شبیه به یک تابلو اعلانات یا فایل‌سرور ایمیلی در داخل Outlook).
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                                <div class="bg-black/50 p-4 rounded-xl border border-white/10 text-gray-300 leading-relaxed text-justify">
+                                    <strong class="text-amber-400 block mb-1">معماری مدرن (Public Folder Mailbox):</strong>
+                                    در نسخه‌های جدید اکسچنج (۲۰۱۳ به بعد)، دیتابیس جداگانه‌ای برای پابلیک فولدر وجود ندارد؛ بلکه ابتدا باید یک <strong>Public Folder Mailbox</strong> بسازید تا از مزایای کلاسترینگ DAG بهره‌مند شود و سپس فولدرهای درختی را داخل آن ایجاد و پرمیشن‌بندی (Owner, Reviewer, Author) کنید.
+                                </div>
+                                <div class="bg-black/50 p-4 rounded-xl border border-white/10 text-gray-300 leading-relaxed text-justify">
+                                    <strong class="text-accent block mb-1">قابلیت Mail-Enable کردن پابلیک فولدر:</strong>
+                                    شما می‌توانید به یک Public Folder آدرس ایمیل اختصاص دهید! در این صورت، هر کس به آن آدرس ایمیل بزند، پیامش مستقیماً داخل آن پوشه عمومی می‌افتد تا تمام اعضای مجاز سازمان آن را ببینند.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Outlook Signatures & Reply / Send To Mechanics -->
+            <section id="outlook-mail-actions" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-signature text-accent"></i>
+                        سیگنیچر (Signature) در اوت‌لوک و مکانیزم‌های Reply / Send To
+                    </h2>
+
+                    <div class="space-y-6">
+                        <!-- Outlook Signature -->
+                        <div class="bg-black/40 p-6 rounded-2xl border border-white/5">
+                            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-pen-nib text-accent"></i> مفهوم Signature (امضای ایمیل) در اوت‌لوک و اکسچنج
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-4">
+                                <strong>Signature</strong> امضای دیجیتال تجاری کاربر (شامل نام، سمت سازمانی، شماره تماس، لوگوی شرکت و لینک‌ها) است که به صورت خودکار در انتهای ایمیل‌های ارسالی درج می‌شود.
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-accent text-sm block mb-1">۱. امضای سمت کلاینت (Outlook / OWA):</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                        کاربر در اوت‌لوک از مسیر <code class="mono-inline">File > Options > Mail > Signatures</code> امضای خود را می‌سازد (فایل‌های آن در مسیر <code class="mono-inline">%appdata%\Microsoft\Signatures</code> ذخیره می‌شوند). می‌توان تعیین کرد که برای ایمیل‌های جدید (New Messages) امضای کامل و برای پاسخ‌ها (Replies/Forwards) امضای کوتاه درج شود. نکته مهم: امضای ساخته‌شده در Outlook با OWA سینک نمی‌شود!
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <strong class="text-purple-400 text-sm block mb-1">۲. امضای متمرکز سمت سرور (Server-Side):</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed text-justify">
+                                        در سازمان‌های Enterprise، برای یکدست بودن امضای تمام پرسنل، ادمین از طریق <strong>Transport Rules (Disclaimers)</strong> در اکسچنج یا ابزارهایی مثل <em>CodeTwo Email Signatures</em>، یک قالب HTML واحد طراحی می‌کند که اطلاعات هر شخص (نام، سمت، تلفن) را خودکار از Active Directory خوانده و زیر ایمیلش می‌چسباند.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reply, Reply All, Forward, Have Replies Sent To -->
+                        <div class="bg-[#050b14] p-6 rounded-2xl border border-white/10">
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-white/10 pb-3">
+                                <i class="fa-solid fa-reply-all text-accent"></i> کالبدشکافی Reply، Reply All و تغییر مسیر پاسخ (Direct Replies To)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-black/40 p-4 rounded-xl border border-white/5">
+                                    <strong class="text-emerald-400 text-sm block mb-2"><i class="fa-solid fa-reply me-1"></i> Reply vs Reply All</strong>
+                                    <p class="text-xs text-gray-300 leading-relaxed text-justify">
+                                        دکمه <strong>Reply</strong> پاسخ شما را <em>فقط و فقط</em> برای فرستنده اصلی ایمیل می‌فرستد. اما <strong>Reply All</strong> پاسخ شما را علاوه بر فرستنده، برای <strong>تمام افرادی که در فیلد To و CC بوده‌اند</strong> نیز ارسال می‌کند (افراد داخل BCC هرگز در Reply All پاسخی دریافت نمی‌کنند).
+                                    </p>
+                                </div>
+
+                                <div class="bg-black/40 p-4 rounded-xl border border-white/5">
+                                    <strong class="text-blue-400 text-sm block mb-2"><i class="fa-solid fa-share me-1"></i> Send To / Forward</strong>
+                                    <p class="text-xs text-gray-300 leading-relaxed text-justify">
+                                        در <strong>Forward</strong>، ایمیل دریافتی به همراه تمامی فایل‌های پیوست (Attachments) برای یک شخص ثالث که در جریان ایمیل اولیه نبوده هدایت می‌شود. گزینه <code class="mono-inline">Send To > Mail Recipient</code> در ویندوز نیز از طریق پروتکل MAPI مستقیماً فایل انتخابی را ضمیمه یک ایمیل جدید در Outlook می‌کند.
+                                    </p>
+                                </div>
+
+                                <div class="bg-accent/10 p-4 rounded-xl border border-accent/30">
+                                    <strong class="text-accent text-sm block mb-2"><i class="fa-solid fa-arrows-turn-to-dots me-1"></i> Have Replies Sent To</strong>
+                                    <p class="text-xs text-gray-300 leading-relaxed text-justify">
+                                        در اوت‌لوک هنگام نوشتن ایمیل (<code class="mono-inline">Options > Direct Replies To</code>)، می‌توانید هدر <code class="mono-inline">Reply-To</code> را تغییر دهید! مثلاً ایمیل از طرف <code class="mono-inline">newsletter@</code> یا <code class="mono-inline">ceo@</code> ارسال می‌شود، اما وقتی گیرنده دکمه <strong>Reply</strong> را می‌زند، پاسخ او خودکار به آدرس <code class="mono-inline">support@</code> یا منشی هدایت می‌شود!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SECTION 6: Calendar Sharing, Required Protocols & Permissions -->
+            <section id="calendar-sharing" class="section-content">
+                <div class="glass-panel rounded-3xl p-6 sm:p-10 lg:p-12 mb-8 relative overflow-hidden">
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-calendar-check text-accent"></i>
+                        اشتراک‌گذاری تقویم (Calendar Sharing)، پروتکل الزامی و سطوح دسترسی
+                    </h2>
+
+                    <div class="space-y-8">
+                        <!-- Protocol Requirement -->
+                        <div class="bg-red-900/20 p-6 rounded-2xl border-r-4 border-red-500">
+                            <h3 class="text-xl font-bold text-red-400 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-network-wired"></i> پیش‌نیاز حیاتی پروتکل برای اشتراک‌گذاری تقویم چیست؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-loose text-justify mb-3">
+                                یک سوال بسیار پرتکرار در عیب‌یابی شبکه‌ها این است که: «چرا گزینه Share Calendar در اوت‌لوک یک کاربر خاموش (Grayed Out) است و کار نمی‌کند؟»
+                            </p>
+                            <div class="bg-black/60 p-4 rounded-xl border border-red-500/30 text-xs sm:text-sm text-gray-300 leading-relaxed text-justify">
+                                <strong class="text-white block mb-1">پاسخ مهندسی:</strong>
+                                پروتکل‌های قدیمی <strong>POP3 و IMAP</strong> صرفاً پروتکل‌های انتقال متن ایمیل هستند و <strong class="text-red-400 underline">مطلقاً از تقویم (Calendar)، مخاطبین و اشتراک‌گذاری پشتیبانی نمی‌کنند!</strong> <br>
+                                برای اینکه Calendar Sharing کار کند، اکانت هر دو طرف در اوت‌لوک <strong>حتماً و بلاشک باید با پروتکل اختصاصی Exchange (یعنی MAPI over HTTP / RPC و سرویس‌های وب EWS - Exchange Web Services)</strong> تنظیم شده باشد!
+                            </div>
+                        </div>
+
+                        <!-- Permission Levels for Calendar Sharing -->
+                        <div class="bg-[#050b14] p-6 rounded-2xl border border-accent/25">
+                            <h3 class="text-xl font-bold text-white mb-4 border-b border-white/10 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-key text-accent"></i> برای اشتراک‌گذاری تقویم چه دسترسی‌هایی (Permissions) باید بدهیم؟
+                            </h3>
+                            <p class="text-sm text-gray-300 leading-relaxed text-justify mb-5">
+                                به صورت پیش‌فرض در اکسچنج، تمام پرسنل سازمان روی تقویم یکدیگر دسترسی <strong>Free/Busy (AvailabilityOnly)</strong> دارند؛ یعنی فقط می‌بینند همکارشان در ساعت ۱۰ صبح «مشغول (Busy)» است یا «آزاد (Free)»، بدون اینکه موضوع جلسه را ببینند. برای اشتراک‌گذاری بیشتر، از بخش <code class="mono-inline">Calendar > Calendar Permissions</code> در اوت‌لوک (یا با پاورشل) یکی از سطوح زیر را به طرف مقابل می‌دهیم:
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <span class="px-2 py-0.5 rounded bg-gray-500/20 text-gray-300 text-xs font-mono float-left">AvailabilityOnly</span>
+                                    <strong class="text-white text-sm block mb-1">1. Can view when I'm busy (پیش‌فرض)</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed">
+                                        طرف مقابل فقط وضعیت کلی زمانی شما (Free, Busy, Tentative, Out of Office) را می‌بیند و هیچ اطلاعی از عنوان یا جزئیات جلسه ندارد.
+                                    </p>
+                                </div>
+
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-xs font-mono float-left">LimitedDetails</span>
+                                    <strong class="text-blue-400 text-sm block mb-1">2. Can view titles and locations</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed">
+                                        طرف مقابل علاوه بر زمان پر و خالی، <strong>عنوان جلسه (Subject) و مکان برگزاری (Location)</strong> را هم می‌بیند، اما متن و توضیحات داخل جلسه را نمی‌بیند.
+                                    </p>
+                                </div>
+
+                                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs font-mono float-left">Reviewer</span>
+                                    <strong class="text-emerald-400 text-sm block mb-1">3. Can view all details (مشاهده کامل)</strong>
+                                    <p class="text-xs text-gray-400 leading-relaxed">
+                                        دسترسی Read-Only کامل! طرف مقابل می‌تواند روی جلسات شما دابل‌کلیک کند و تمام جزئیات، متن، پیوست‌ها و لیست شرکت‌کنندگان را بخواند (بدون حق ویرایش).
+                                    </p>
+                                </div>
+
+                                <div class="bg-accent/10 p-4 rounded-xl border border-accent/30">
+                                    <span class="px-2 py-0.5 rounded bg-accent/20 text-accent text-xs font-mono float-left">Editor / Delegate</span>
+                                    <strong class="text-accent text-sm block mb-1">4. Can edit / Delegate (ویرایش و مدیریت کامل)</strong>
+                                    <p class="text-xs text-gray-300 leading-relaxed">
+                                        مناسب برای <strong>مسئول دفتر و منشی مدیران</strong>. طرف مقابل می‌تواند مستقیماً در تقویم مدیر جلسه جدید ثبت کند، جلسات را جابجا یا حذف کند و در حالت <em>Delegate</em> حتی به دعوت‌نامه‌های جلسات از طرف مدیر پاسخ دهد.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <span class="text-xs text-gray-400 block mb-1">اعطای دسترسی تقویم توسط ادمین از طریق PowerShell (EMS):</span>
+                            <div class="code-block text-xs sm:text-sm">
+                                # Give Secretary 'Editor' permission on Manager's Calendar:<br>
+                                Add-MailboxFolderPermission -Identity "manager@company.com:\Calendar" -User "secretary@company.com" -AccessRights Editor
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.section-content');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = item.getAttribute('data-target');
+
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+
+                    sections.forEach(section => {
+                        section.classList.remove('active', 'fade-in');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                            // Trigger reflow to restart animation
+                            void section.offsetWidth; 
+                            section.classList.add('fade-in');
+                        }
+                    });
+
+                    // Close mobile sidebar after click
+                    if(window.innerWidth < 1024) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
+
+            function openMobileSidebar() {
+                sidebar.classList.remove('translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('opacity-100');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.add('translate-x-full');
+                sidebarOverlay.classList.remove('opacity-100');
+                setTimeout(() => {
+                    sidebarOverlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+
+            mobileMenuBtn.addEventListener('click', openMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
+        });
+    </script>
+</body>
+</html>
